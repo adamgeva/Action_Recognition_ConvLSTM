@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 class BaseTrain:
-    def __init__(self, sess, model, config, logger, data_loader=None):
+    def __init__(self, sess, model, config, logger):
         """
         Constructing the trainer
         :param sess: TF.Session() instance
@@ -16,8 +16,6 @@ class BaseTrain:
         self.logger = logger
         self.config = config
         self.sess = sess
-        if data_loader is not None:
-            self.data_loader = data_loader
 
         # Initialize all variables of the graph
         self.init = tf.global_variables_initializer()
@@ -30,7 +28,7 @@ class BaseTrain:
         :return:
         """
         for cur_epoch in range(self.model.cur_epoch_tensor.eval(self.sess), self.config.num_epochs + 1, 1):
-            self.train_epoch()
+            self.train_epoch(cur_epoch)
             self.sess.run(self.model.increment_cur_epoch_tensor)
 
     def train_epoch(self, epoch=None):
@@ -44,7 +42,7 @@ class BaseTrain:
         """
         raise NotImplementedError
 
-    def train_step(self):
+    def train_validate_step(self):
         """
         implement the logic of the train step
 
