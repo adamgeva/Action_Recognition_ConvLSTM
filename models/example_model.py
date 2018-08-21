@@ -11,8 +11,6 @@ class ExampleModel(BaseModel):
 
     def __init__(self, config):
         super(ExampleModel, self).__init__(config)
-        self.build_model()
-        self.init_saver()
 
         # mobile_net nodes
         self.mn_input_img = None
@@ -39,6 +37,9 @@ class ExampleModel(BaseModel):
         self.alphas = None
         self.v = None
         self.is_training = None
+
+        self.build_model()
+        self.init_saver()
 
     def build_model(self):
         self.is_training = tf.placeholder(tf.bool)
@@ -192,12 +193,28 @@ class ExampleModel(BaseModel):
         result = tf.nn.dropout((tf.matmul(inputs, weights2) + biases2), drop_prob)
         return result
 
+    # the saver node was created already - this actually restores the variables
     def restore_mobile_net(self, sess):
         self.mn_mobilenet_saver.restore(sess, self.config.mobile_net_ckpt)
 
+    # just creates the saver node
     def init_saver(self):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
+
+
+    def compute_alphas_attention(full_model_specs, sess, batch_fc_img, batch_conv_img, batch_labels):
+        alphas = full_model_specs['alphas']
+        v = full_model_specs['v']
+
+        al, v = sess.run([alphas, v], feed_dict={
+            full_model_specs['fc_img']: batch_fc_img,
+            full_model_specs['conv_img']: batch_conv_img,
+            full_model_specs['ys']: batch_labels,
+            full_model_specs['prob']: 1.0
+        })
+
+        return al, v
 
 
 

@@ -24,13 +24,6 @@ class DefinedSummarizer:
 
         self.summary_writer = tf.summary.FileWriter(summary_dir)
 
-        if "comet_api_key" in config:
-            from comet_ml import Experiment
-            self.experiment = Experiment(api_key=config['comet_api_key'], project_name=config['exp_name'])
-            self.experiment.log_multiple_params(config)
-
-
-
     def set_summaries(self, scalar_tags=None, images_tags=None):
         self.scalar_tags = scalar_tags
         self.images_tags = images_tags
@@ -69,7 +62,6 @@ class DefinedSummarizer:
             if hasattr(self, 'experiment') and self.experiment is not None:
                 self.experiment.log_multiple_metrics(summaries_dict, step=step)
 
-
     def finalize(self):
         self.summary_writer.flush()
 
@@ -83,15 +75,6 @@ class Logger:
         self.train_summary_writer = tf.summary.FileWriter(os.path.join(self.config.summary_dir, "train"),
                                                           self.sess.graph)
         self.test_summary_writer = tf.summary.FileWriter(os.path.join(self.config.summary_dir, "test"))
-
-        if "comet_api_key" in config:
-            from comet_ml import Experiment
-            self.experiment = Experiment(api_key=config['comet_api_key'], project_name=config['exp_name'])
-            self.experiment.disable_mp()
-            self.experiment.log_multiple_params(config)
-
-
-
 
     # it can summarize scalars and images.
     def summarize(self, step, summarizer="train", scope="", summaries_dict=None):

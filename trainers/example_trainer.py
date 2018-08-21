@@ -4,6 +4,12 @@ import numpy as np
 import gc
 
 
+def accuracy(a, b):
+    c = np.equal(a, b).astype(float)
+    acc = sum(c) / len(c)
+    return acc
+
+
 class ExampleTrainer(BaseTrain):
     def __init__(self, sess, model, data_train, data_validate, config, logger):
         super(ExampleTrainer, self).__init__(sess, model, config, logger)
@@ -11,55 +17,67 @@ class ExampleTrainer(BaseTrain):
         self.data_train = data_train
         self.data_validate = data_validate
 
+        # restore mobile net
+        self.model.restore_mobile_net(sess)
+
     def train_epoch(self, curr_epoch):
         lr = self.config.basic_lr
 
         # todo: num_iter_per_epoch should be calaulated: (len_train_eff // params['batch_size']) + 1))
         loop_train = tqdm(range(self.config.num_train_iter_per_epoch))
 
-        losses = []
-        accs = []
         # iterate over steps (batches)
         for _ in loop_train:
-            loss = self.train_validate_step(lr, True)
+            accu_add, accu_mul, loss = self.train_validate_step(lr, True)
 
             cur_it = self.model.global_step_tensor.eval(self.sess)
             summaries_dict = {
                 'loss': loss,
-                #    'acc': acc,
+                'accuracy_add': accu_add,
+                'accuracy_multiply': accu_mul
             }
             self.logger.summarize(cur_it, summaries_dict=summaries_dict)
 
-            #accs.append(acc)
             # todo: is this still necessary?
-            gc.collect()
+            #gc.collect()
 
         # validate every few epochs
         if curr_epoch % self.config.val_interval == 0:
+            losses_val = []
+            accs_add_val = []
+            accs_mul_val = []
+
             # todo: num_iter_per_epoch should be calaulated: (len_train_eff // params['batch_size']) + 1))
             loop_validate = tqdm(range(self.config.num_val_iter_per_epoch))
 
             # iterate over steps (batches)
             for _ in loop_validate:
-                loss = self.train_validate_step(lr, False)
-                # todo: should i fix the cut_it?
-                cur_it = self.model.global_step_tensor.eval(self.sess)
-                summaries_dict = {
-                    'loss_validation': loss,
-                    #    'acc': acc,
-                }
-                self.logger.summarize(cur_it, summaries_dict=summaries_dict)
+                accu_add, accu_mul, loss = self.train_validate_step(lr, False)
+                losses_val.append(loss)
+                accs_add_val.append(accu_add)
+                accs_mul_val.append(accu_mul)
 
+            loss_val_epoch = np.mean(losses_val)
+            accs_add_val_epoch = np.mean(accs_add_val)
+            accs_mul_val_epoch = np.mean(accs_mul_val)
+
+            cur_it = self.model.global_step_tensor.eval(self.sess)
+            summaries_dict = {
+                'loss_validation': loss_val_epoch,
+                'accuracy_add_validation': accs_add_val_epoch,
+                'accuracy_multiply_validation': accs_mul_val_epoch
+            }
+            self.logger.summarize(cur_it, summaries_dict=summaries_dict)
 
         self.model.save(self.sess)
 
     def train_validate_step(self, lr, is_training):
+        # get next batch
+        batch_fc_img, batch_conv_img, batch_labels = self.data_train.get_next_batch()
 
         if is_training:
-            batch_fc_img, batch_conv_img, batch_labels = self.data_train.get_next_batch()
             prob = 0.5
         else:
-            batch_fc_img, batch_conv_img, batch_labels = self.data_validate.get_next_batch()
             prob = 1.0
 
         feed_dict = {
@@ -71,100 +89,26 @@ class ExampleTrainer(BaseTrain):
             self.model.prob: prob
         }
 
-        # todo: add accuracy and different types of loss/ alphas - create designated functions
         if is_training:
-            _, loss = self.sess.run([self.model.train_op, self.model.loss], feed_dict=feed_dict)
+            _, fc_score, conv_score, loss = self.sess.run([self.model.train_op, self.model.fc_pred,
+                                                                 self.model.conv_pred, self.model.loss], feed_dict)
         else:
-            loss = self.sess.run([self.model.loss], feed_dict=feed_dict)
+            fc_score, conv_score, loss = self.sess.run([self.model.fc_pred, self.model.conv_pred,
+                                                              self.model.loss], feed_dict)
 
-        return loss
+        # calc accuracy of the batch
+        fc_score = np.reshape(np.array(fc_score), (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
+        conv_score = np.reshape(np.array(conv_score), (self.config.batch_size, self.config.n_classes))
 
+        # fusion by addition
+        fus_add = np.add(fc_score, conv_score)
+        predictions = np.argmax(fus_add, axis=1)
+        accu_add = accuracy(predictions, batch_labels)
 
+        # fusion by multiplication
+        fus_mul = np.multiply(fc_score, conv_score)
+        predictions = np.argmax(fus_mul, axis=1)
+        accu_mul = accuracy(predictions, batch_labels)
 
+        return accu_add, accu_mul, loss
 
-# iterate over epochs
-for l in range(1000):
-
-
-
-
-        summary, test_fc_score, test_conv_score, test_loss = compute_score_loss(full_model_specs, sess, batch_fc_img,
-                                                                                batch_conv_img, batch_labels)
-
-        writer_test.add_summary(summary, ((n_test_examples // params['batch_size'] + 1) * l + i))
-
-        print("test_loss:", test_loss)
-        test_fc_score = np.reshape(np.array(test_fc_score),
-                                   (params['batch_size'], params['n_classes']))  # (batch_size, n_classes)
-        test_conv_score = np.reshape(np.array(test_conv_score), (params['batch_size'], params['n_classes']))
-
-        fc_scores.append(test_fc_score)
-        conv_scores.append(test_conv_score)
-        pbar.update(1)
-
-    fc_scores = np.reshape(np.array(fc_scores), (-1, params['n_classes']))[:n_test_examples]
-    conv_scores = np.reshape(np.array(conv_scores), (-1, params['n_classes']))[:n_test_examples]
-
-    print(fc_scores.shape)
-    print(conv_scores.shape)
-
-    pbar.close()
-
-    num_test_score = fc_scores
-    test_label_pred = np.argmax(num_test_score, axis=1)
-    print(test_label_pred.shape)
-    print(l, "epoch:, attention，Fc_lstm_ACC:", accuracy(test_label_pred, test_examples_labels))
-    test_info = []
-    for i in range(n_test_examples):
-        video_info = []
-        video_info.append(num_test_score[i])
-        video_info.append(test_examples_labels[i])
-        test_info.append(video_info)
-
-    npz_name = "score_attention/" + str(l) + "_epoch_fc_score.npz"
-    np.savez(npz_name, test_info=test_info)
-
-    num_test_score = conv_scores
-    test_label_pred = np.argmax(num_test_score, axis=1)
-    print(test_label_pred.shape)
-    print(l, "epoch:, attention，Conv_lstm_ACC:", accuracy(test_label_pred, test_examples_labels))
-    test_info = []
-    for i in range(n_test_examples):
-        video_info = []
-        video_info.append(num_test_score[i])
-        video_info.append(test_examples_labels[i])
-        test_info.append(video_info)
-
-    npz_name = "score_attention/" + str(l) + "_epoch_conv_score.npz"
-    np.savez(npz_name, test_info=test_info)
-
-    num_test_score = np.add(fc_scores, conv_scores)
-    test_label_pred = np.argmax(num_test_score, axis=1)
-    print(test_label_pred.shape)
-    print(l, "epoch:, attention，Add_fusion_ACC:", accuracy(test_label_pred, test_examples_labels))
-    test_info = []
-    for i in range(n_test_examples):
-        video_info = []
-        video_info.append(num_test_score[i])
-        video_info.append(test_examples_labels[i])
-        test_info.append(video_info)
-
-    npz_name = "score_attention/" + str(l) + "_epoch_numscore.npz"
-    np.savez(npz_name, test_info=test_info)
-
-    mul_test_score = np.multiply(fc_scores, conv_scores)
-    test_label_pred = np.argmax(mul_test_score, axis=1)
-    print(test_label_pred.shape)
-    print(l, "epoch:, attention，Mul_fusion_ACC:", accuracy(test_label_pred, test_examples_labels))
-    test_info = []
-    for i in range(n_test_examples):
-        video_info = []
-        video_info.append(mul_test_score[i])
-        video_info.append(test_examples_labels[i])
-        test_info.append(video_info)
-
-    npz_name = "score_attention/" + str(l) + "_epoch_mulscore.npz"
-    np.savez(npz_name, test_info=test_info)
-
-    # reset test data feeder
-    test_feeder.reset_feeder()
