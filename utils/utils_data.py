@@ -1,4 +1,5 @@
 import random
+import re
 
 
 def read_classes(class_path):
@@ -10,8 +11,8 @@ def read_classes(class_path):
     names = []
     for label in labels:
         a = label.split(" ")
-        nums.append(int(a[0])-1)
-        names.append(a[1][:-1])
+        nums.append(int(a[0]))
+        names.append(a[2][:-1])
     label_dict = dict(zip(names, nums))
     print(label_dict)
 
@@ -38,7 +39,9 @@ def read_data(list_path, label_dict, is_shuffle):
     # read train labels
     labels = []
     for video in lines:
-        video_class = str(video.split(" ")).split("_")[1]
+        x = video.split(" ")[0].split('_')[-1][:-4]
+        video_class = re.split('(\d+)', x)[0]
+
         ground_label = label_dict[video_class]
         labels.append(ground_label)
 

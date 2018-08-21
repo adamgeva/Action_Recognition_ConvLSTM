@@ -13,8 +13,7 @@ def main():
     # capture the config path from the run arguments
     # then process the json configuration file
     try:
-        args = get_args()
-        config = process_config(args.config)
+        config = process_config('/home/ADAMGE/action_recognition/action_recognition_v1/configs/example.json')
 
     except Exception as e:
         print("missing or invalid arguments %s" % e)
@@ -23,8 +22,11 @@ def main():
     # create the experiments dirs
     create_dirs([config.summary_dir, config.checkpoint_dir])
 
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
+    sess_config = tf.ConfigProto(gpu_options=gpu_options)
+
     # create tensorflow session
-    sess = tf.Session()
+    sess = tf.Session(config=sess_config)
 
     # create an instance of the model you want
     model = ExampleModel(config)

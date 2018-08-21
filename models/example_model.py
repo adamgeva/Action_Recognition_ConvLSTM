@@ -45,7 +45,8 @@ class ExampleModel(BaseModel):
         self.is_training = tf.placeholder(tf.bool)
 
         #  start by building the feature extractor:
-        self.build_mobile_net()
+        with tf.variable_scope("mobile_net"):
+            self.build_mobile_net()
 
         # build the LSTM channels
         fc_img = tf.placeholder(tf.float32, [None, self.config.n_steps, self.config.n_fc_inputs])
@@ -67,7 +68,7 @@ class ExampleModel(BaseModel):
         fc_img_drop = tf.nn.dropout(fc_img_out, prob)
         conv_img_drop = tf.nn.dropout(conv_img_out, prob)
         conv_img_drop = tf.nn.max_pool(conv_img_drop, [1, 7, 7, 1], [1, 1, 1, 1], padding='VALID')
-        conv_img_drop = tf.reshape(conv_img_drop, [-1, self.config.filters])
+        conv_img_drop = tf.reshape(conv_img_drop, [-1, self.config.n_filters])
 
         with tf.variable_scope("FC"):
             fc_result = self.FC_layer(fc_img_drop, prob)
@@ -173,7 +174,7 @@ class ExampleModel(BaseModel):
             return outputs_spa
 
     def CONV_LSTM(self, conv_img, attention):
-        img_cell = ConvLSTMCell(self.config.conv_input_shape, self.config.filters, self.config.kernel)
+        img_cell = ConvLSTMCell(self.config.conv_input_shape, self.config.n_filters, self.config.kernel)
         img_outputs, img_state = tf.nn.dynamic_rnn(img_cell, conv_img, dtype=conv_img.dtype, time_major=True)
         if attention:
             img_attention_output, alphas, v = conv_attention_sum(img_outputs, self.config.attention_kernel)

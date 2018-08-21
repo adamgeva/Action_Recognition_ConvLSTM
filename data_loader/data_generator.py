@@ -18,9 +18,9 @@ class DataGenerator:
 
         # load data here (shuffle inside)
         if mode == "train":
-            self.lines, self.labels, self.len_lines = utils_data.read_data(config.train_list, label_dict, True)
+            self.lines, self.labels, self.len_lines = utils_data.read_data(config.train_list, self.label_dict, True)
         elif mode == "test":
-            self.lines, self.labels, self.len_lines = utils_data.read_data(config.test_list, label_dict, False)
+            self.lines, self.labels, self.len_lines = utils_data.read_data(config.test_list, self.label_dict, False)
 
         # feeder state
         self._curr_line_num = 0

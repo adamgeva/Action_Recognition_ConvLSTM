@@ -1,0 +1,91 @@
+import os
+from random import shuffle
+import re
+
+
+# create the file with statistics
+def lists_to_file(text_filename, lists, labels):
+    text_file = open(text_filename, "w")
+
+    for class_list in lists:
+        for file_name in class_list:
+            x = file_name.split('_')[-1][:-4]
+            class_name = re.split('(\d+)', x)[0]
+            class_id = labels[class_name]
+            text_file.write("%s  %d\n" % (file_name, class_id))
+
+    text_file.close()
+
+
+# script for creating the data reference files:
+test_percent = 15 / 100
+val_percent = 15 / 100
+
+# first create the label dictionary
+labels = dict()
+labels = {
+    'boxing': 0,
+    'carrying': 1,
+    'clapping': 2,
+    'digging': 3,
+    'jogging': 4,
+    'openclosetrunk': 5,
+    'running': 6,
+    'throwing': 7,
+    'walking': 8,
+    'waving': 9
+}
+
+root_dir = '/hdd/UCF-ARG/rooftop_clips_stab_crop/'
+
+subdirs = [x[0] for x in os.walk(root_dir)]
+print(subdirs)
+
+class_lists_train = []
+class_lists_val = []
+class_lists_test = []
+
+for sub_dir in subdirs[1:]:
+    # create the train list
+    files_train = os.listdir(sub_dir)
+    # shuffle
+    shuffle(files_train)
+
+    total_examples_in_class = len(files_train)
+    # create the validation list
+    files_val = []
+    # we take the top 15 percent after shuffling
+    for example_ind in range(int(total_examples_in_class * val_percent)):
+        file_name = files_train[example_ind]
+        # add to val list
+        files_val.append(file_name)
+        # remove from train list
+        files_train.remove(file_name)
+
+    # create the test list
+    files_test = []
+    # we take the top 15 percent after shuffling
+    for example_ind in range(int(total_examples_in_class * test_percent)):
+        file_name = files_train[example_ind]
+        # add to val list
+        files_test.append(file_name)
+        # remove from train list
+        files_train.remove(file_name)
+
+    class_lists_train.append(files_train)
+    class_lists_val.append(files_val)
+    class_lists_test.append(files_test)
+
+
+# print all lists to files
+# train
+lists_to_file(root_dir + "train_list.txt", class_lists_train, labels)
+lists_to_file(root_dir + "val_list.txt", class_lists_val, labels)
+lists_to_file(root_dir + "test_list.txt", class_lists_test, labels)
+
+# print the labels file
+text_file = open(root_dir + "classesInd.txt", "w")
+for class_name in sorted(labels):
+    text_file.write("%d  %s\n" % (labels[class_name], class_name))
+text_file.close()
+

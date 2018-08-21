@@ -18,7 +18,7 @@ class ExampleTrainer(BaseTrain):
         self.data_validate = data_validate
 
         # restore mobile net
-        self.model.restore_mobile_net(sess)
+        self.model.restore_mobile_net(self.sess)
 
     def train_epoch(self, curr_epoch):
         lr = self.config.basic_lr
