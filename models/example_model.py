@@ -89,7 +89,7 @@ class ExampleModel(BaseModel):
 
         merged = tf.summary.merge_all()
 
-        train_op = tf.train.AdamOptimizer(Lr).minimize(loss)
+        train_op = tf.train.AdamOptimizer(Lr).minimize(loss, global_step=self.global_step_tensor)
 
         #saver = tf.train.Saver()
 
@@ -140,9 +140,12 @@ class ExampleModel(BaseModel):
         # Restore using exponential moving average since it produces (1.5-2%) higher
         # accuracy
         ema = tf.train.ExponentialMovingAverage(0.999)
-        variables_to_restore = ema.variables_to_restore()
+        #variables_to_restore = ema.variables_to_restore()
+        #variables_to_restore = slim.get_model_variables()
+        var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='mobile_net')
+        var_list = {var.op.name[11:]: var for var in var_list}
 
-        mobilenet_saver = tf.train.Saver(variables_to_restore)
+        mobilenet_saver = tf.train.Saver(var_list)
 
         self.mn_input_img = input_img
         self.mn_layer_15 = layer_15

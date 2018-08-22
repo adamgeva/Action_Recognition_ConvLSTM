@@ -1,6 +1,6 @@
 import random
 import cv2
-
+import re
 
 # select a clip from all the training clips
 def select_clip(train_set_length, train_names, data_dict):
@@ -23,9 +23,9 @@ def get_clip_meta(video_path):
 # takes a line and returns the full path and class of the vid line
 def line_to_path(line, ucf_path):
     video_name = line.split(" ")[0]
-    curr_video_class = video_name[2:-6]
-    video_dir = video_name[:-3]
-    curr_video_full_path = ucf_path + curr_video_class + '/' + video_dir + '/' + video_name + '.mpg'
+    x = video_name.split('_')[-1][:-4]
+    curr_video_class = re.split('(\d+)', x)[0]
+    curr_video_full_path = ucf_path + curr_video_class + '/' + video_name
 
     return curr_video_full_path, curr_video_class
 

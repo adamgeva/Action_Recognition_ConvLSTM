@@ -55,7 +55,7 @@ class DataGenerator:
 
                 # create the label example
                 one_hot = np.zeros(self.config.n_classes, dtype=np.int8)
-                one_hot[self.label_dict[curr_video_class.split("_")[0]]] = 1
+                one_hot[self.label_dict[curr_video_class]] = 1
                 label = np.expand_dims(one_hot, axis=0)
 
                 # extract features of example
@@ -84,7 +84,7 @@ class DataGenerator:
     def get_next_example(self):
         # returns the video full path, class, first frame to read from
         line = self.lines[self._curr_line_num]
-        curr_video_full_path, curr_video_class = utils_video.line_to_path(line, self.config.UCF11_path)
+        curr_video_full_path, curr_video_class = utils_video.line_to_path(line, self.config.UCF_ARG_path)
         self.update_state()
         return curr_video_full_path, curr_video_class
 
@@ -117,7 +117,7 @@ def get_fc_conv_features(model, config, sess, video_path):
 
         #name = params['res_vids_path'] + str(frame_num) + 'frame.jpg'
         #cv2.imwrite(name, frame)
-        #cv2.imshow("Video", frame)
+        #cv2.imshow("Vid", frame)
         #key_pressed = cv2.waitKey(10)  # Escape to exit
 
         # process frame
@@ -127,8 +127,8 @@ def get_fc_conv_features(model, config, sess, video_path):
         #res2, res = self._my_sess.run([self._pool5_features,
         #                      self._fc6_features], {self._input_img: centered_image})
 
-        res2, res = sess.run([model.layer_15, model.global_pool],
-                             {model.input_img: centered_image})
+        res2, res = sess.run([model.mn_layer_15, model.mn_global_pool],
+                             {model.mn_input_img: centered_image})
 
         #pred = sess.run(model_specs['predictions'], {model_specs['input_img']: centered_image})
         #label_map = imagenet.create_readable_names_for_imagenet_labels()

@@ -20,11 +20,14 @@ class ExampleTrainer(BaseTrain):
         # restore mobile net
         self.model.restore_mobile_net(self.sess)
 
+        # calculate number of training and validation steps per epochs
+        self.num_train_iter_per_epoch = data_train.len_lines // self.config.batch_size
+        self.num_validation_iter_per_epoch = data_validate.len_lines // self.config.batch_size
+
     def train_epoch(self, curr_epoch):
         lr = self.config.basic_lr
 
-        # todo: num_iter_per_epoch should be calaulated: (len_train_eff // params['batch_size']) + 1))
-        loop_train = tqdm(range(self.config.num_train_iter_per_epoch))
+        loop_train = tqdm(range(self.num_train_iter_per_epoch))
 
         # iterate over steps (batches)
         for _ in loop_train:
@@ -47,8 +50,7 @@ class ExampleTrainer(BaseTrain):
             accs_add_val = []
             accs_mul_val = []
 
-            # todo: num_iter_per_epoch should be calaulated: (len_train_eff // params['batch_size']) + 1))
-            loop_validate = tqdm(range(self.config.num_val_iter_per_epoch))
+            loop_validate = tqdm(range(self.num_validation_iter_per_epoch))
 
             # iterate over steps (batches)
             for _ in loop_validate:
@@ -69,16 +71,22 @@ class ExampleTrainer(BaseTrain):
             }
             self.logger.summarize(cur_it, summaries_dict=summaries_dict)
 
+        # save model
         self.model.save(self.sess)
 
-    def train_validate_step(self, lr, is_training):
-        # get next batch
-        batch_fc_img, batch_conv_img, batch_labels = self.data_train.get_next_batch()
+        # reset feeders for the next epoch
+        self.data_train.reset_feeder()
+        self.data_validate.reset_feeder()
 
+    def train_validate_step(self, lr, is_training):
+
+        # get next batch
         if is_training:
             prob = 0.5
+            batch_fc_img, batch_conv_img, batch_labels = self.data_train.next_batch()
         else:
             prob = 1.0
+            batch_fc_img, batch_conv_img, batch_labels = self.data_validate.next_batch()
 
         feed_dict = {
             self.model.fc_img: batch_fc_img,
@@ -103,12 +111,12 @@ class ExampleTrainer(BaseTrain):
         # fusion by addition
         fus_add = np.add(fc_score, conv_score)
         predictions = np.argmax(fus_add, axis=1)
-        accu_add = accuracy(predictions, batch_labels)
+        accu_add = accuracy(predictions, np.nonzero(batch_labels)[1])
 
         # fusion by multiplication
         fus_mul = np.multiply(fc_score, conv_score)
         predictions = np.argmax(fus_mul, axis=1)
-        accu_mul = accuracy(predictions, batch_labels)
+        accu_mul = accuracy(predictions, np.nonzero(batch_labels)[1])
 
         return accu_add, accu_mul, loss
 

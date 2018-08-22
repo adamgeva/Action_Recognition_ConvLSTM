@@ -18,8 +18,10 @@ def lists_to_file(text_filename, lists, labels):
 
 
 # script for creating the data reference files:
+train_percent = 100 / 100 # change below 1 only for debugging mode.
 test_percent = 15 / 100
 val_percent = 15 / 100
+
 
 # first create the label dictionary
 labels = dict()
@@ -51,7 +53,10 @@ for sub_dir in subdirs[1:]:
     # shuffle
     shuffle(files_train)
 
-    total_examples_in_class = len(files_train)
+    # these two lines are for debugging purposes when we want to create a very small and fast dataset
+    total_examples_in_class = int(len(files_train) * train_percent)
+    files_train = files_train[:total_examples_in_class]
+
     # create the validation list
     files_val = []
     # we take the top 15 percent after shuffling

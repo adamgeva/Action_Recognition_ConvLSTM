@@ -1,6 +1,7 @@
 import json
 from easydict import EasyDict
 import os
+import datetime
 
 
 def get_config_from_json(json_file):
@@ -21,6 +22,7 @@ def get_config_from_json(json_file):
 
 def process_config(json_file):
     config, _ = get_config_from_json(json_file)
-    config.summary_dir = os.path.join("../experiments", config.exp_name, "summary/")
-    config.checkpoint_dir = os.path.join("../experiments", config.exp_name, "checkpoint/")
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    config.summary_dir = os.path.join("../experiments", now, "summary/")
+    config.checkpoint_dir = os.path.join("../experiments", now, "checkpoint/")
     return config
