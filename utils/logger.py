@@ -2,68 +2,66 @@ import os
 
 import tensorflow as tf
 
+from textwrap import wrap
+import re
+import itertools
+import tfplot
+import matplotlib
+import numpy as np
+from sklearn.metrics import confusion_matrix
+
+
+def plot_confusion_matrix(labels, correct_labels, predict_labels, title='Confusion matrix', tensor_name='MyFigure/image', normalize=False):
+
+# Parameters:
+#     correct_labels                  : These are your true classification categories.
+#     predict_labels                  : These are you predicted classification categories
+#     labels                          : This is a lit of labels which will be used to display the axix labels
+#     title='Confusion matrix'        : Title for your matrix
+#     tensor_name = 'MyFigure/image'  : Name for the output summay tensor
 #
-# class DefinedSummarizer:
-#     def __init__(self, sess, summary_dir, scalar_tags=None, images_tags=None):
-#         """
-#         :param sess: The Graph tensorflow session used in your graph.
-#         :param summary_dir: the directory which will save the summaries of the graph
-#         :param scalar_tags: The tags of summaries you will use in your training loop
-#         :param images_tags: The tags of image summaries you will use in your training loop
-#         """
-#         self.sess = sess
+# Returns:
+#     summary: TensorFlow summary
 #
-#         self.scalar_tags = scalar_tags
-#         self.images_tags = images_tags
-#
-#         self.summary_tags = []
-#         self.summary_placeholders = {}
-#         self.summary_ops = {}
-#
-#         self.init_summary_ops()
-#
-#         self.summary_writer = tf.summary.FileWriter(summary_dir)
-#
-#     def set_summaries(self, scalar_tags=None, images_tags=None):
-#         self.scalar_tags = scalar_tags
-#         self.images_tags = images_tags
-#         self.init_summary_ops()
-#
-#     def init_summary_ops(self):
-#         with tf.variable_scope('summary_ops'):
-#             if self.scalar_tags is not None:
-#                 for tag in self.scalar_tags:
-#                     self.summary_tags += [tag]
-#                     self.summary_placeholders[tag] = tf.placeholder('float32', None, name=tag)
-#                     self.summary_ops[tag] = tf.summary.scalar(tag, self.summary_placeholders[tag])
-#             if self.images_tags is not None:
-#                 for tag, shape in self.images_tags:
-#                     self.summary_tags += [tag]
-#                     self.summary_placeholders[tag] = tf.placeholder('float32', shape, name=tag)
-#                     self.summary_ops[tag] = tf.summary.image(tag, self.summary_placeholders[tag], max_outputs=10)
-#
-#     def summarize(self, step, summaries_dict=None, summaries_merged=None):
-#         """
-#         Add the summaries to tensorboard
-#         :param step: the number of iteration in your training
-#         :param summaries_dict: the dictionary which contains your summaries .
-#         :param summaries_merged: Merged summaries which they come from your graph
-#         :return:
-#         """
-#         if summaries_dict is not None:
-#             summary_list = self.sess.run([self.summary_ops[tag] for tag in summaries_dict.keys()],
-#                                          {self.summary_placeholders[tag]: value for tag, value in
-#                                           summaries_dict.items()})
-#             for summary in summary_list:
-#                 self.summary_writer.add_summary(summary, step)
-#         if summaries_merged is not None:
-#             self.summary_writer.add_summary(summaries_merged, step)
-#
-#             if hasattr(self, 'experiment') and self.experiment is not None:
-#                 self.experiment.log_multiple_metrics(summaries_dict, step=step)
-#
-#     def finalize(self):
-#         self.summary_writer.flush()
+# Other itema to note:
+#     - Depending on the number of category and the data , you may have to modify the figzie, font sizes etc.
+#     - Currently, some of the ticks dont line up due to rotations.
+
+    cm = confusion_matrix(correct_labels, predict_labels, labels)
+    if normalize:
+        cm = cm.astype('float')*10 / cm.sum(axis=1)[:, np.newaxis]
+        cm = np.nan_to_num(cm, copy=True)
+        cm = cm.astype('int')
+
+    np.set_printoptions(precision=2)
+    ###fig, ax = matplotlib.figure.Figure()
+
+    fig = matplotlib.figure.Figure(figsize=(7, 7), dpi=320, facecolor='w', edgecolor='k')
+    ax = fig.add_subplot(1, 1, 1)
+    im = ax.imshow(cm, cmap='Oranges')
+
+    classes = [re.sub(r'([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))', r'\1 ', x) for x in labels]
+    classes = ['\n'.join(wrap(l, 40)) for l in classes]
+
+    tick_marks = np.arange(len(classes))
+
+    ax.set_xlabel('Predicted', fontsize=7)
+    ax.set_xticks(tick_marks)
+    c = ax.set_xticklabels(classes, fontsize=4, rotation=-90,  ha='center')
+    ax.xaxis.set_label_position('bottom')
+    ax.xaxis.tick_bottom()
+
+    ax.set_ylabel('True Label', fontsize=7)
+    ax.set_yticks(tick_marks)
+    ax.set_yticklabels(classes, fontsize=4, va ='center')
+    ax.yaxis.set_label_position('left')
+    ax.yaxis.tick_left()
+
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=6, verticalalignment='center', color= "black")
+    fig.set_tight_layout(True)
+    summary = tfplot.figure.to_summary(fig, tag=tensor_name)
+    return summary
 
 
 class Logger:
@@ -75,6 +73,8 @@ class Logger:
         self.train_summary_writer = tf.summary.FileWriter(os.path.join(self.config.summary_dir, "train"),
                                                           self.sess.graph)
         self.test_summary_writer = tf.summary.FileWriter(os.path.join(self.config.summary_dir, "test"))
+
+        self.img_d_summary_dir = tf.summary.FileWriter(os.path.join(self.config.summary_dir, "val_img"))
 
     # it can summarize scalars and images.
     def summarize(self, step, summarizer="train", scope="", summaries_dict=None):
@@ -111,3 +111,12 @@ class Logger:
                     self.experiment.log_multiple_metrics(summaries_dict, step=step)
 
                 summary_writer.flush()
+
+    def confusion_mat(self, step, labels, gt_classes_val, predictions_add_val, predictions_mul_val):
+        conf_mat_add_summary = plot_confusion_matrix(labels, gt_classes_val, predictions_add_val, title="Confusion matrix- Add", tensor_name='MyFigure/add')
+        conf_mat_mul_summary = plot_confusion_matrix(labels, gt_classes_val, predictions_mul_val, title="Confusion matrix- Multiply", tensor_name='MyFigure/mul')
+        self.test_summary_writer.add_summary(conf_mat_add_summary, step)
+        self.test_summary_writer.add_summary(conf_mat_mul_summary, step)
+        self.test_summary_writer.flush()
+
+

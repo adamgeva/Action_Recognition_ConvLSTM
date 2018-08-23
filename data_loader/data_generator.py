@@ -15,6 +15,7 @@ class DataGenerator:
         self.sess = sess
         # read classes dict
         self.label_dict = utils_data.read_classes(config.classInd)
+        self.label_dict_inv = {v: k for k, v in self.label_dict.items()}
 
         # load data here (shuffle inside)
         if mode == "train":

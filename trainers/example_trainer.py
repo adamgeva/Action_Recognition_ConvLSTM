@@ -31,7 +31,7 @@ class ExampleTrainer(BaseTrain):
 
         # iterate over steps (batches)
         for _ in loop_train:
-            accu_add, accu_mul, loss = self.train_validate_step(lr, True)
+            accu_add, accu_mul, loss, _, _, _ = self.train_validate_step(lr, True)
 
             cur_it = self.model.global_step_tensor.eval(self.sess)
             summaries_dict = {
@@ -49,15 +49,23 @@ class ExampleTrainer(BaseTrain):
             losses_val = []
             accs_add_val = []
             accs_mul_val = []
+            predictions_add_val = []
+            predictions_mul_val = []
+            gt_classes_val = []
 
             loop_validate = tqdm(range(self.num_validation_iter_per_epoch))
 
             # iterate over steps (batches)
             for _ in loop_validate:
-                accu_add, accu_mul, loss = self.train_validate_step(lr, False)
+                accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes = self.train_validate_step(lr, False)
                 losses_val.append(loss)
                 accs_add_val.append(accu_add)
                 accs_mul_val.append(accu_mul)
+
+                # collect also the actual predictions to create confusion matrix
+                predictions_add_val = np.append(predictions_add_val, predictions_add)
+                predictions_mul_val = np.append(predictions_mul_val, predictions_mul)
+                gt_classes_val = np.append(gt_classes_val, gt_classes)
 
             loss_val_epoch = np.mean(losses_val)
             accs_add_val_epoch = np.mean(accs_add_val)
@@ -70,6 +78,11 @@ class ExampleTrainer(BaseTrain):
                 'accuracy_multiply_validation': accs_mul_val_epoch
             }
             self.logger.summarize(cur_it, summaries_dict=summaries_dict)
+
+            labels = sorted(self.data_train.label_dict, key=self.data_train.label_dict.get)
+            self.logger.confusion_mat(cur_it, labels, [self.data_train.label_dict_inv[int(i)] for i in gt_classes_val],
+                                      [self.data_train.label_dict_inv[int(i)] for i in predictions_add_val],
+                                      [self.data_train.label_dict_inv[int(i)] for i in predictions_mul_val])
 
         # save model
         self.model.save(self.sess)
@@ -108,15 +121,17 @@ class ExampleTrainer(BaseTrain):
         fc_score = np.reshape(np.array(fc_score), (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
         conv_score = np.reshape(np.array(conv_score), (self.config.batch_size, self.config.n_classes))
 
+        gt_classes = np.nonzero(batch_labels)[1]
+
         # fusion by addition
         fus_add = np.add(fc_score, conv_score)
-        predictions = np.argmax(fus_add, axis=1)
-        accu_add = accuracy(predictions, np.nonzero(batch_labels)[1])
+        predictions_add = np.argmax(fus_add, axis=1)
+        accu_add = accuracy(predictions_add, gt_classes)
 
         # fusion by multiplication
         fus_mul = np.multiply(fc_score, conv_score)
-        predictions = np.argmax(fus_mul, axis=1)
-        accu_mul = accuracy(predictions, np.nonzero(batch_labels)[1])
+        predictions_mul = np.argmax(fus_mul, axis=1)
+        accu_mul = accuracy(predictions_mul, gt_classes)
 
-        return accu_add, accu_mul, loss
+        return accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes
 
