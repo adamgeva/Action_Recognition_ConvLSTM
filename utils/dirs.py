@@ -15,7 +15,8 @@ def create_dirs(dirs, json_filename):
 
         # copy the current json file for future reference
         dst = os.path.abspath(os.path.join(dirs[0], '..')) + "/configs_file.json"
-        copyfile(json_filename, dst)
+        if not os.path.exists(dst):
+            copyfile(json_filename, dst)
 
         return 0
     except Exception as err:
