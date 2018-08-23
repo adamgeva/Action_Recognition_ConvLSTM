@@ -20,12 +20,6 @@
   "conv_input_shape" : [7, 7],
   "channels" : 576,
   "kernel" : [3, 3],
-  "attention_kernel" : [1, 1],
-  "UCF_ARG_path" : "/hdd/UCF-ARG/rooftop_clips_stab_crop/",
-  "train_list" : "/hdd/UCF-ARG/rooftop_clips_stab_crop/train_list.txt",
-  "test_list"  : "/hdd/UCF-ARG/rooftop_clips_stab_crop/test_list.txt",
-  "val_list"  : "/hdd/UCF-ARG/rooftop_clips_stab_crop/val_list.txt",
-  "classInd"   : "/hdd/UCF-ARG/rooftop_clips_stab_crop/classesInd.txt",
-  "mobile_net_ckpt" : "/home/ADAMGE/action_recognition/models/mobilenet_v2_1.0_224.ckpt"
+  "attention_kernel" : [1, 1]
 
 }
