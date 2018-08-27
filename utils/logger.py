@@ -36,7 +36,7 @@ def plot_confusion_matrix(labels, correct_labels, predict_labels, title='Confusi
     np.set_printoptions(precision=2)
     ###fig, ax = matplotlib.figure.Figure()
 
-    fig = matplotlib.figure.Figure(figsize=(7, 7), dpi=320, facecolor='w', edgecolor='k')
+    fig = matplotlib.figure.Figure(figsize=(3, 3), dpi=320, facecolor='w', edgecolor='k')
     ax = fig.add_subplot(1, 1, 1)
     im = ax.imshow(cm, cmap='Oranges')
 
@@ -45,20 +45,20 @@ def plot_confusion_matrix(labels, correct_labels, predict_labels, title='Confusi
 
     tick_marks = np.arange(len(classes))
 
-    ax.set_xlabel('Predicted', fontsize=7)
+    ax.set_xlabel('Predicted', fontsize=4)
     ax.set_xticks(tick_marks)
-    c = ax.set_xticklabels(classes, fontsize=4, rotation=-90,  ha='center')
+    c = ax.set_xticklabels(classes, fontsize=2, rotation=-90,  ha='center')
     ax.xaxis.set_label_position('bottom')
     ax.xaxis.tick_bottom()
 
-    ax.set_ylabel('True Label', fontsize=7)
+    ax.set_ylabel('True Label', fontsize=4)
     ax.set_yticks(tick_marks)
-    ax.set_yticklabels(classes, fontsize=4, va ='center')
+    ax.set_yticklabels(classes, fontsize=2, va ='center')
     ax.yaxis.set_label_position('left')
     ax.yaxis.tick_left()
 
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=6, verticalalignment='center', color= "black")
+        ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=3, verticalalignment='center', color= "black")
     fig.set_tight_layout(True)
     summary = tfplot.figure.to_summary(fig, tag=tensor_name)
     return summary
@@ -112,11 +112,19 @@ class Logger:
 
                 summary_writer.flush()
 
-    def confusion_mat(self, step, labels, gt_classes_val, predictions_add_val, predictions_mul_val):
-        conf_mat_add_summary = plot_confusion_matrix(labels, gt_classes_val, predictions_add_val, title="Confusion matrix- Add", tensor_name='MyFigure/add')
-        conf_mat_mul_summary = plot_confusion_matrix(labels, gt_classes_val, predictions_mul_val, title="Confusion matrix- Multiply", tensor_name='MyFigure/mul')
-        self.test_summary_writer.add_summary(conf_mat_add_summary, step)
-        self.test_summary_writer.add_summary(conf_mat_mul_summary, step)
-        self.test_summary_writer.flush()
+    def confusion_mat(self, step, labels, gt_classes, predictions_add, predictions_mul, mode):
+        conf_mat_add_summary = plot_confusion_matrix(labels, gt_classes, predictions_add, title="Confusion matrix- Add", tensor_name='MyFigure/add')
+        conf_mat_mul_summary = plot_confusion_matrix(labels, gt_classes, predictions_mul, title="Confusion matrix- Multiply", tensor_name='MyFigure/mul')
+
+        if mode == 'train':
+            summary_writer = self.train_summary_writer
+        elif mode == 'validate':
+            summary_writer = self.img_d_summary_dir
+        else:
+            summary_writer = self.test_summary_writer
+
+        summary_writer.add_summary(conf_mat_add_summary, step)
+        summary_writer.add_summary(conf_mat_mul_summary, step)
+        summary_writer.flush()
 
 

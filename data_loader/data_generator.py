@@ -6,7 +6,7 @@ import time
 
 
 class DataGenerator:
-    def __init__(self, model, config, sess, mode):
+    def __init__(self, model, config, sess, data_name, shuffle):
         self.config = config
 
         # data_generator receives the model and session because it runs the first part of the model -
@@ -18,10 +18,14 @@ class DataGenerator:
         self.label_dict_inv = {v: k for k, v in self.label_dict.items()}
 
         # load data here (shuffle inside)
-        if mode == "train":
-            self.lines, self.labels, self.len_lines = utils_data.read_data(config.train_list, self.label_dict, True)
-        elif mode == "test":
-            self.lines, self.labels, self.len_lines = utils_data.read_data(config.test_list, self.label_dict, False)
+        if data_name == 'train':
+            data_list = config.train_list
+        elif data_name == 'validate':
+            data_list = config.val_list
+        else:
+            data_list = config.test_list
+
+        self.lines, self.labels, self.len_lines = utils_data.read_data(data_list, self.label_dict, shuffle)
 
         # feeder state
         self._curr_line_num = 0
@@ -31,7 +35,7 @@ class DataGenerator:
         self._curr_line_num = 0
 
     # returns the batch fc and conv features and labels
-    def next_batch(self):
+    def next_batch(self, is_training):
         time1 = time.time()
 
         batch_fc_img = np.zeros((self.config.batch_size,
@@ -61,7 +65,7 @@ class DataGenerator:
 
                 # extract features of example
                 bit_correct, fc_img_fea, conv_img_fea = get_fc_conv_features(self.model, self.config,
-                                                                             self.sess, curr_video_full_path)
+                                                                             self.sess, curr_video_full_path, is_training)
 
                 if bit_correct == 1:
                     print('ERROR: skipping clip...')
@@ -94,7 +98,7 @@ class DataGenerator:
 
 
 # use CNN to extract features - these features are then used as input for the LSTM networks
-def get_fc_conv_features(model, config, sess, video_path):
+def get_fc_conv_features(model, config, sess, video_path, is_training):
 
     num_conv_features = (config.conv_input_shape[0], config.conv_input_shape[1], config.channels)
 
@@ -129,7 +133,7 @@ def get_fc_conv_features(model, config, sess, video_path):
         #                      self._fc6_features], {self._input_img: centered_image})
 
         res2, res = sess.run([model.mn_layer_15, model.mn_global_pool],
-                             {model.mn_input_img: centered_image})
+                             {model.mn_input_img: centered_image, model.is_training: is_training})
 
         #pred = sess.run(model_specs['predictions'], {model_specs['input_img']: centered_image})
         #label_map = imagenet.create_readable_names_for_imagenet_labels()

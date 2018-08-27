@@ -18,7 +18,7 @@ def lists_to_file(text_filename, lists, labels):
 
 
 # script for creating the data reference files:
-train_percent = 100 / 100 # change below 1 only for debugging mode.
+train_percent = 4 / 100 # change below 1 only for debugging mode.
 test_percent = 15 / 100
 val_percent = 15 / 100
 

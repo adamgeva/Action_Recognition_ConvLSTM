@@ -96,17 +96,17 @@ class ExampleTrainer(BaseTrain):
         # get next batch
         if is_training:
             prob = 0.5
-            batch_fc_img, batch_conv_img, batch_labels = self.data_train.next_batch()
+            batch_fc_img, batch_conv_img, batch_labels = self.data_train.next_batch(is_training)
         else:
             prob = 1.0
-            batch_fc_img, batch_conv_img, batch_labels = self.data_validate.next_batch()
+            batch_fc_img, batch_conv_img, batch_labels = self.data_validate.next_batch(is_training)
 
         feed_dict = {
+            self.model.is_training: is_training,
             self.model.fc_img: batch_fc_img,
             self.model.conv_img: batch_conv_img,
             self.model.ys: batch_labels,
             self.model.Lr: lr,
-            self.model.is_training: is_training,
             self.model.prob: prob
         }
 

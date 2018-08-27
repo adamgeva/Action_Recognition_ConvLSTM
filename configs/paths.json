@@ -4,6 +4,5 @@
   "test_list"  : "/hdd/UCF-ARG/rooftop_clips_stab_crop/test_list.txt",
   "val_list"  : "/hdd/UCF-ARG/rooftop_clips_stab_crop/val_list.txt",
   "classInd"   : "/hdd/UCF-ARG/rooftop_clips_stab_crop/classesInd.txt",
-  "mobile_net_ckpt" : "/home/ADAMGE/action_recognition/models/mobilenet_v2_1.0_224.ckpt"
-
+  "mobile_net_ckpt" : "/home/ADAMGE/action_recognition/models/mobile_net_imagenet/mobilenet_v2_1.0_224.ckpt"
 }

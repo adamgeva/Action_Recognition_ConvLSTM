@@ -36,17 +36,18 @@ class ExampleModel(BaseModel):
         self.prob = None
         self.alphas = None
         self.v = None
+        # todo: is that the correct initialization?
         self.is_training = None
 
         self.build_model()
         self.init_saver()
 
     def build_model(self):
-        self.is_training = tf.placeholder(tf.bool)
+        is_training = tf.placeholder(tf.bool)
 
         #  start by building the feature extractor:
         with tf.variable_scope("mobile_net"):
-            self.build_mobile_net()
+            self.build_mobile_net(is_training)
 
         # build the LSTM channels
         fc_img = tf.placeholder(tf.float32, [None, self.config.n_steps, self.config.n_fc_inputs])
@@ -110,8 +111,9 @@ class ExampleModel(BaseModel):
         self.prob = prob
         self.alphas = alphas
         self.v = v
+        self.is_training = is_training
 
-    def build_mobile_net(self):
+    def build_mobile_net(self, is_training):
         # define model
         # input is already centered and cropped to mobile_net input size
         input_img = tf.placeholder(tf.float32, self.config.frame_size)
@@ -122,7 +124,9 @@ class ExampleModel(BaseModel):
         input_img_expanded = tf.expand_dims(input_img, 0)
 
         # Define the model:
-        last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_expanded, is_training=False)
+        # Note: arg_scope is optional for inference.
+        with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=is_training)):
+            last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_expanded)
 
         layer_15 = end_points['layer_15/depthwise_output']
         global_pool = end_points['global_pool']

@@ -101,6 +101,8 @@ ENV/
 
 # experiments
 experiments/
+configs/paths.json
+
 
 # data
 data/cifar-100-python/
