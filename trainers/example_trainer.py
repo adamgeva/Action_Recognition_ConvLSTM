@@ -82,7 +82,7 @@ class ExampleTrainer(BaseTrain):
             labels = sorted(self.data_train.label_dict, key=self.data_train.label_dict.get)
             self.logger.confusion_mat(cur_it, labels, [self.data_train.label_dict_inv[int(i)] for i in gt_classes_val],
                                       [self.data_train.label_dict_inv[int(i)] for i in predictions_add_val],
-                                      [self.data_train.label_dict_inv[int(i)] for i in predictions_mul_val])
+                                      [self.data_train.label_dict_inv[int(i)] for i in predictions_mul_val], 'validate')
 
         # save model
         self.model.save(self.sess)

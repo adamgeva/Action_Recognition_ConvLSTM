@@ -1,4 +1,5 @@
 import tensorflow as tf
+from os import listdir
 
 
 class BaseModel:
@@ -27,11 +28,17 @@ class BaseModel:
 
     # load latest checkpoint from the experiment path defined in the config file
     def load(self, sess):
-        latest_checkpoint = tf.train.latest_checkpoint(self.config.checkpoint_dir)
-        if latest_checkpoint:
-            print("Loading model checkpoint {} ...\n".format(latest_checkpoint))
-            self.saver.restore(sess, latest_checkpoint)
-            print("Model loaded")
+        # find latest checkpoint
+        list_of_files = listdir(self.config.checkpoint_dir)
+        list_num = [file.split('.')[0][1:] for file in list_of_files]
+        only_nums = sorted(list_num)[:-1]
+        only_nums.sort(key=int)
+        model_num = only_nums[-1]
+        model_name = self.config.checkpoint_dir + '-' + str(model_num)
+        # load
+        print("Loading model checkpoint {} ...\n".format(model_name))
+        self.saver.restore(sess, model_name)
+        print("Model loaded")
 
     # just initialize a tensorflow variable to use it as epoch counter
     def init_cur_epoch(self):

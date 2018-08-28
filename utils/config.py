@@ -4,7 +4,6 @@ import os
 import datetime
 
 
-
 def get_config_from_json(json_file):
     """
     Get the config from a json file
@@ -37,5 +36,4 @@ def process_config(params_json, paths_json, new_exp):
     else:
         config.summary_dir = os.path.join(os.path.dirname(params_json), "summary/")
         config.checkpoint_dir = os.path.join(os.path.dirname(params_json), "checkpoint/")
-
     return config
