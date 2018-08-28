@@ -41,9 +41,6 @@ class ExampleTrainer(BaseTrain):
             }
             self.logger.summarize(cur_it, summaries_dict=summaries_dict)
 
-            # todo: is this still necessary?
-            #gc.collect()
-
         # validate every few epochs
         if curr_epoch % self.config.val_interval == 0:
             losses_val = []
@@ -96,15 +93,14 @@ class ExampleTrainer(BaseTrain):
         # get next batch
         if is_training:
             prob = 0.5
-            batch_fc_img, batch_conv_img, batch_labels = self.data_train.next_batch(is_training)
+            batch_frames, batch_labels = self.data_train.next_batch()
         else:
             prob = 1.0
-            batch_fc_img, batch_conv_img, batch_labels = self.data_validate.next_batch(is_training)
+            batch_frames, batch_labels = self.data_validate.next_batch()
 
         feed_dict = {
             self.model.is_training: is_training,
-            self.model.fc_img: batch_fc_img,
-            self.model.conv_img: batch_conv_img,
+            self.model.input_img: batch_frames,
             self.model.ys: batch_labels,
             self.model.Lr: lr,
             self.model.prob: prob

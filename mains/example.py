@@ -52,7 +52,8 @@ def main():
     trainer = ExampleTrainer(sess, model, data_train, data_validate, config, logger)
 
     # load model if exists
-    model.load(sess)
+    if new_exp == 'N':
+        model.load(sess)
 
     # training
     trainer.train()

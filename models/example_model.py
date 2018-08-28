@@ -13,7 +13,7 @@ class ExampleModel(BaseModel):
         super(ExampleModel, self).__init__(config)
 
         # mobile_net nodes
-        self.mn_input_img = None
+        self.input_img = None
         self.mn_layer_15 = None
         self.mn_global_pool = None
         self.mn_predictions = None
@@ -43,16 +43,8 @@ class ExampleModel(BaseModel):
         self.init_saver()
 
     def build_model(self):
+        # training mode
         is_training = tf.placeholder(tf.bool)
-
-        #  start by building the feature extractor:
-        with tf.variable_scope("mobile_net"):
-            self.build_mobile_net(is_training)
-
-        # build the LSTM channels
-        fc_img = tf.placeholder(tf.float32, [None, self.config.n_steps, self.config.n_fc_inputs])
-        conv_img = tf.placeholder(tf.float32,
-                                  [None, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
 
         # y - supervision
         ys = tf.placeholder(tf.float32, [None, self.config.n_classes])
@@ -63,8 +55,35 @@ class ExampleModel(BaseModel):
         # dropout probability
         prob = tf.placeholder_with_default(1.0, shape=())
 
-        fc_img_out = self.FC_LSTM(fc_img, True)
-        conv_img_out, alphas, v = self.CONV_LSTM(conv_img, True)
+        # input is already centered and cropped to mobile_net input size
+        input_img = tf.placeholder(tf.float32, [None, self.config.n_steps] + self.config.frame_size)
+
+        # reshape to match mobilenet input
+        input_img_mn = tf.reshape(input_img, [-1] + self.config.frame_size)
+
+        #  start by building the feature extractor:
+        with tf.variable_scope("mobile_net"):
+            # Define the model:
+            # Note: arg_scope is optional for inference.
+            with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=is_training)):
+                last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_mn)
+
+            conv_img = end_points['layer_15/depthwise_output']
+            fc_img = end_points['global_pool']
+            predictions = end_points['Predictions']
+
+            var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='mobile_net')
+            var_list = {var.op.name[11:]: var for var in var_list}
+            mobilenet_saver = tf.train.Saver(var_list)
+
+        # todo: get the shape from output!
+        # reshape bach to have n_steps dimension
+        conv_img_re = tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
+        fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
+        fc_img_re = tf.squeeze(fc_img_re, [2,3])
+
+        fc_img_out = self.FC_LSTM(fc_img_re, True)
+        conv_img_out, alphas, v = self.CONV_LSTM(conv_img_re, True)
 
         fc_img_drop = tf.nn.dropout(fc_img_out, prob)
         conv_img_drop = tf.nn.dropout(conv_img_out, prob)
@@ -83,13 +102,6 @@ class ExampleModel(BaseModel):
         conv_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=conv_result, labels=ys))
         loss = fc_loss + conv_loss
 
-        # summaries
-        tf.summary.scalar('fc_loss', fc_loss)
-        tf.summary.scalar('conv_loss', conv_loss)
-        tf.summary.scalar('loss', loss)
-
-        merged = tf.summary.merge_all()
-
         train_op = tf.train.AdamOptimizer(Lr).minimize(loss, global_step=self.global_step_tensor)
 
         #saver = tf.train.Saver()
@@ -107,53 +119,12 @@ class ExampleModel(BaseModel):
         self.fc_pred = fc_pred
         self.conv_pred = conv_pred
         self.loss = loss
-        self.merged = merged
         self.prob = prob
         self.alphas = alphas
         self.v = v
         self.is_training = is_training
 
-    def build_mobile_net(self, is_training):
-        # define model
-        # input is already centered and cropped to mobile_net input size
-        input_img = tf.placeholder(tf.float32, self.config.frame_size)
-
-        slim = tf.contrib.slim
-
-        # expands dimensions (adds batch dim)
-        input_img_expanded = tf.expand_dims(input_img, 0)
-
-        # Define the model:
-        # Note: arg_scope is optional for inference.
-        with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=is_training)):
-            last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_expanded)
-
-        layer_15 = end_points['layer_15/depthwise_output']
-        global_pool = end_points['global_pool']
-        predictions = end_points['Predictions']
-
-        # variables_to_restore = slim.get_model_variables()
-        # variables_to_restore = {name_in_checkpoint(var):var for var in variables_to_restore}
-        # restorer = tf.train.Saver(variables_to_restore)
-
-        # restore variables of trained vgg_16
-        # variables_to_restore = slim.get_model_variables()
-        # init_fn = slim.assign_from_checkpoint_fn("vgg_16.ckpt", variables_to_restore)
-        # init_fn_mobilenet = slim.assign_from_checkpoint_fn("mobile_net/mobilenet_v2_1.0_224.ckpt", variables_to_restore)
-
-        # Restore using exponential moving average since it produces (1.5-2%) higher
-        # accuracy
-        ema = tf.train.ExponentialMovingAverage(0.999)
-        #variables_to_restore = ema.variables_to_restore()
-        #variables_to_restore = slim.get_model_variables()
-        var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='mobile_net')
-        var_list = {var.op.name[11:]: var for var in var_list}
-
-        mobilenet_saver = tf.train.Saver(var_list)
-
-        self.mn_input_img = input_img
-        self.mn_layer_15 = layer_15
-        self.mn_global_pool = global_pool
+        self.input_img = input_img
         self.mn_predictions = predictions
         self.mn_mobilenet_saver = mobilenet_saver
 
@@ -209,7 +180,6 @@ class ExampleModel(BaseModel):
     def init_saver(self):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
-
 
     def compute_alphas_attention(full_model_specs, sess, batch_fc_img, batch_conv_img, batch_labels):
         alphas = full_model_specs['alphas']
