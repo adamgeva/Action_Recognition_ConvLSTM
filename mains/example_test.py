@@ -39,6 +39,9 @@ def main():
     # create trainer and pass all the previous components to it
     tester = ExampleTester(sess, model, data_test, config, logger)
 
+    # restore mobile net
+    model.restore_mobile_net(sess)
+
     # load model if exists
     model.load(sess)
 

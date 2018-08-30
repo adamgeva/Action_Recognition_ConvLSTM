@@ -16,9 +16,6 @@ class ExampleTester(BaseTest):
 
         self.data_test = data_test
 
-        # restore mobile net
-        self.model.restore_mobile_net(self.sess)
-
         # calculate number of training and validation steps per epochs
         self.num_iter_data = data_test.len_lines // self.config.batch_size
 
@@ -65,13 +62,12 @@ class ExampleTester(BaseTest):
     def test_step(self):
 
         prob = 1.0
-        batch_fc_img, batch_conv_img, batch_labels = self.data_test.next_batch()
+        batch_frames, batch_labels = self.data_test.next_batch()
 
         feed_dict = {
-            self.model.fc_img: batch_fc_img,
-            self.model.conv_img: batch_conv_img,
-            self.model.ys: batch_labels,
             self.model.is_training: False,
+            self.model.input_img: batch_frames,
+            self.model.ys: batch_labels,
             self.model.prob: prob
         }
 

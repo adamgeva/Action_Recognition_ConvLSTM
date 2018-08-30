@@ -29,15 +29,10 @@ class BaseModel:
     # load latest checkpoint from the experiment path defined in the config file
     def load(self, sess):
         # find latest checkpoint
-        list_of_files = listdir(self.config.checkpoint_dir)
-        list_num = [file.split('.')[0][1:] for file in list_of_files]
-        only_nums = sorted(list_num)[:-1]
-        only_nums.sort(key=int)
-        model_num = only_nums[-1]
-        model_name = self.config.checkpoint_dir + '-' + str(model_num)
         # load
+        model_name = self.get_latest_model_name()
         print("Loading model checkpoint {} ...\n".format(model_name))
-        self.saver.restore(sess, model_name)
+        self.lstm_saver.restore(sess, model_name)
         print("Model loaded")
 
     # just initialize a tensorflow variable to use it as epoch counter
@@ -55,10 +50,19 @@ class BaseModel:
             # by .minimize function in the optimizers of tensorflow
             self.increment_global_step_tensor = tf.assign(self.global_step_tensor, self.global_step_tensor + 1)
 
-    def init_saver(self):
+    def init_global_saver(self):
         # just copy the following line in your child class
         # self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
         raise NotImplementedError
 
     def build_model(self):
         raise NotImplementedError
+
+    def get_latest_model_name(self):
+        list_of_files = listdir(self.config.checkpoint_dir)
+        list_num = [file.split('.')[0][1:] for file in list_of_files]
+        only_nums = sorted(list_num)[:-1]
+        only_nums.sort(key=int)
+        model_num = only_nums[-1]
+        model_name = self.config.checkpoint_dir + '-' + str(model_num)
+        return model_name

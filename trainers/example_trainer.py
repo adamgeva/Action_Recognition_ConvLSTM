@@ -17,9 +17,6 @@ class ExampleTrainer(BaseTrain):
         self.data_train = data_train
         self.data_validate = data_validate
 
-        # restore mobile net
-        self.model.restore_mobile_net(self.sess)
-
         # calculate number of training and validation steps per epochs
         self.num_train_iter_per_epoch = data_train.len_lines // self.config.batch_size
         self.num_validation_iter_per_epoch = data_validate.len_lines // self.config.batch_size

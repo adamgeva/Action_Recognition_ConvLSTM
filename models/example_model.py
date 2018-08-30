@@ -7,6 +7,12 @@ import tensorflow as tf
 from nets.mobilenet import mobilenet_v2
 
 
+def print_list_to_file(list, file_name):
+    thefile = open(file_name, 'w')
+    for item in list:
+        thefile.write("%s\n" % item)
+
+
 class ExampleModel(BaseModel):
 
     def __init__(self, config):
@@ -14,9 +20,9 @@ class ExampleModel(BaseModel):
 
         # mobile_net nodes
         self.input_img = None
-        self.mn_layer_15 = None
-        self.mn_global_pool = None
-        self.mn_predictions = None
+        #self.mn_layer_15 = None
+        #self.mn_global_pool = None
+        #self.mn_predictions = None
         self.mn_mobilenet_saver = None
 
         # complete network nodes
@@ -28,11 +34,14 @@ class ExampleModel(BaseModel):
         self.fc_loss = None
         self.conv_loss = None
         self.train_op = None
+
         self.saver = None
+        self.mobilenet_saver = None
+        self.lstm_saver = None
+
         self.fc_pred = None
         self.conv_pred = None
         self.loss = None
-        self.merged = None
         self.prob = None
         self.alphas = None
         self.v = None
@@ -40,7 +49,8 @@ class ExampleModel(BaseModel):
         self.is_training = None
 
         self.build_model()
-        self.init_saver()
+        self.init_global_saver()
+        self.init_lstm_saver()
 
     def build_model(self):
         # training mode
@@ -65,19 +75,17 @@ class ExampleModel(BaseModel):
         with tf.variable_scope("mobile_net"):
             # Define the model:
             # Note: arg_scope is optional for inference.
-            with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=is_training)):
-                last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_mn)
+            with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
+                last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_mn, is_training=False)
 
             conv_img = end_points['layer_15/depthwise_output']
             fc_img = end_points['global_pool']
             predictions = end_points['Predictions']
-
-            var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='mobile_net')
-            var_list = {var.op.name[11:]: var for var in var_list}
-            mobilenet_saver = tf.train.Saver(var_list)
+            # initialize the mobilenet saver
+            self.init_mobilenet_saver()
 
         # todo: get the shape from output!
-        # reshape bach to have n_steps dimension
+        # reshape batch to have n_steps dimension
         conv_img_re = tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
         fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
         fc_img_re = tf.squeeze(fc_img_re, [2,3])
@@ -126,7 +134,6 @@ class ExampleModel(BaseModel):
 
         self.input_img = input_img
         self.mn_predictions = predictions
-        self.mn_mobilenet_saver = mobilenet_saver
 
     def FC_LSTM(self, X_spa, attention):
         weights_img = tf.Variable(tf.random_normal([self.config.n_fc_inputs, self.config.n_hidden_units]))
@@ -174,11 +181,35 @@ class ExampleModel(BaseModel):
 
     # the saver node was created already - this actually restores the variables
     def restore_mobile_net(self, sess):
-        self.mn_mobilenet_saver.restore(sess, self.config.mobile_net_ckpt)
+        if self.config.mobilenet_base == 'imagenet':
+            print("Loading mobilenet model from checkpoint {} ...\n".format(self.config.mobile_net_ckpt))
+            self.mobilenet_saver.restore(sess, self.config.mobile_net_ckpt)
+        else:
+            model_name = self.get_latest_model_name()
+            print("Loading mobilenet model from checkpoint {} ...\n".format(model_name))
+            self.mobilenet_saver.restore(sess, model_name)
+
 
     # just creates the saver node
-    def init_saver(self):
+    def init_mobilenet_saver(self):
+        var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='mobile_net')
+
+        if self.config.mobilenet_base == 'imagenet':
+            var_list = {var.op.name[11:]: var for var in var_list}
+        # restoring from my checkpoint
+
+        self.mobilenet_saver = tf.train.Saver(var_list, max_to_keep=self.config.max_to_keep)
+
+    # just creates the saver node
+    def init_lstm_saver(self):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
+        # this saver deals with all cariables except mobile net.
+        restore_var = [v for v in tf.all_variables() if v.name[:10] != 'mobile_net']
+
+        self.lstm_saver = tf.train.Saver(restore_var, max_to_keep=self.config.max_to_keep)
+
+    # just creates the saver node
+    def init_global_saver(self):
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
     def compute_alphas_attention(full_model_specs, sess, batch_fc_img, batch_conv_img, batch_labels):
@@ -193,8 +224,6 @@ class ExampleModel(BaseModel):
         })
 
         return al, v
-
-
 
 
 

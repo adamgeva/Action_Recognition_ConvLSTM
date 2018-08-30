@@ -51,6 +51,9 @@ def main():
     # create trainer and pass all the previous components to it
     trainer = ExampleTrainer(sess, model, data_train, data_validate, config, logger)
 
+    # restore mobile net
+    model.restore_mobile_net(sess)
+
     # load model if exists
     if new_exp == 'N':
         model.load(sess)
