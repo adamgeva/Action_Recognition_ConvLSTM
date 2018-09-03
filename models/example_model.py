@@ -76,9 +76,9 @@ class ExampleModel(BaseModel):
             # Define the model:
             # Note: arg_scope is optional for inference.
             with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
-                last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_mn, is_training=False)
+                last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_mn)
 
-            conv_img = end_points['layer_15/depthwise_output']
+            conv_img = end_points[self.config.mobilenet_out_layer]
             fc_img = end_points['global_pool']
             predictions = end_points['Predictions']
             # initialize the mobilenet saver
@@ -86,16 +86,17 @@ class ExampleModel(BaseModel):
 
         # todo: get the shape from output!
         # reshape batch to have n_steps dimension
-        conv_img_re = tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
+        conv_img_re = tf.stop_gradient(tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels]))
         fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
-        fc_img_re = tf.squeeze(fc_img_re, [2,3])
+        fc_img_re = tf.stop_gradient(tf.squeeze(fc_img_re, [2, 3]))
 
         fc_img_out = self.FC_LSTM(fc_img_re, True)
         conv_img_out, alphas, v = self.CONV_LSTM(conv_img_re, True)
 
         fc_img_drop = tf.nn.dropout(fc_img_out, prob)
         conv_img_drop = tf.nn.dropout(conv_img_out, prob)
-        conv_img_drop = tf.nn.max_pool(conv_img_drop, [1, 7, 7, 1], [1, 1, 1, 1], padding='VALID')
+        conv_img_drop = tf.nn.max_pool(conv_img_drop, [1, self.config.conv_input_shape[0],
+                                                       self.config.conv_input_shape[1], 1], [1, 1, 1, 1], padding='VALID')
         conv_img_drop = tf.reshape(conv_img_drop, [-1, self.config.n_filters])
 
         with tf.variable_scope("FC"):
@@ -205,11 +206,16 @@ class ExampleModel(BaseModel):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         # this saver deals with all cariables except mobile net.
         restore_var = [v for v in tf.all_variables() if v.name[:10] != 'mobile_net']
-
         self.lstm_saver = tf.train.Saver(restore_var, max_to_keep=self.config.max_to_keep)
 
     # just creates the saver node
     def init_global_saver(self):
+
+        var_names = [v.name for v in tf.all_variables()]
+        with open('all_vars.txt', 'w') as f:
+            for item in var_names:
+                f.write("%s\n" % item)
+
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
     def compute_alphas_attention(full_model_specs, sess, batch_fc_img, batch_conv_img, batch_labels):

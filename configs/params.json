@@ -4,7 +4,7 @@
   "num_epochs": 100,
   "val_interval": 1,
   "basic_lr": 0.0001,
-  "batch_size": 2,
+  "batch_size": 1,
   "max_to_keep":5,
   "n_fc_inputs" : 1280,
   "n_timesteps" : 40,
@@ -18,7 +18,8 @@
   "frame_size" : [224, 224, 3],
   "n_examples_per_clip" : 10,
   "n_step_size" : 20,
-  "conv_input_shape" : [7, 7],
+  "conv_input_shape" : [14, 14],
+  "mobilenet_out_layer" : "layer_14/depthwise_output",
   "channels" : 576,
   "kernel" : [3, 3],
   "attention_kernel" : [1, 1]
