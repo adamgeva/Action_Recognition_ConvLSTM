@@ -18,7 +18,7 @@ class ExampleTrainer(BaseTrain):
         self.data_validate = data_validate
 
         # calculate number of training and validation steps per epochs
-        self.num_train_iter_per_epoch = data_train.len_lines // self.config.batch_size
+        self.num_train_iter_per_epoch = data_train.len_lines // (self.config.batch_size * self.config.n_minibatches)
         self.num_validation_iter_per_epoch = data_validate.len_lines // self.config.batch_size
 
     def train_epoch(self, curr_epoch):
@@ -28,7 +28,7 @@ class ExampleTrainer(BaseTrain):
 
         # iterate over steps (batches)
         for _ in loop_train:
-            accu_add, accu_mul, loss, _, _, _ = self.train_validate_step(lr, True)
+            accu_add, accu_mul, loss = self.train_step(lr)
 
             cur_it = self.model.global_step_tensor.eval(self.sess)
             summaries_dict = {
@@ -85,30 +85,23 @@ class ExampleTrainer(BaseTrain):
         self.data_train.reset_feeder()
         self.data_validate.reset_feeder()
 
-    def train_validate_step(self, lr, is_training):
+    def validate_step(self, lr):
 
         # get next batch
-        if is_training:
-            prob = 0.5
-            batch_frames, batch_labels = self.data_train.next_batch()
-        else:
-            prob = 1.0
-            batch_frames, batch_labels = self.data_validate.next_batch()
+
+        prob = 1.0
+        batch_frames, batch_labels = self.data_validate.next_batch()
 
         feed_dict = {
-            self.model.is_training: is_training,
+            self.model.is_training: False,
             self.model.input_img: batch_frames,
             self.model.ys: batch_labels,
             self.model.Lr: lr,
             self.model.prob: prob
         }
 
-        if is_training:
-            _, fc_score, conv_score, loss = self.sess.run([self.model.train_op, self.model.fc_pred,
-                                                                 self.model.conv_pred, self.model.loss], feed_dict)
-        else:
-            fc_score, conv_score, loss = self.sess.run([self.model.fc_pred, self.model.conv_pred,
-                                                              self.model.loss], feed_dict)
+        fc_score, conv_score, loss = self.sess.run([self.model.fc_pred, self.model.conv_pred,
+                                                          self.model.loss], feed_dict)
 
         # calc accuracy of the batch
         fc_score = np.reshape(np.array(fc_score), (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
@@ -128,3 +121,66 @@ class ExampleTrainer(BaseTrain):
 
         return accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes
 
+    def train_step(self, lr):
+
+        # get next batch
+        prob = 0.5
+
+        accu_add_batch = 0
+        accu_mul_batch = 0
+        loss_batch = 0
+
+        # Run the zero_ops to initialize it
+        self.sess.run(self.model.zero_ops)
+        # Accumulate the gradients 'n_minibatches' times in accum_vars using accum_ops
+        for i in range(self.config.n_minibatches):
+
+            batch_frames, batch_labels = self.data_train.next_batch()
+
+            feed_dict = {
+                self.model.is_training: True,
+                self.model.input_img: batch_frames,
+                self.model.ys: batch_labels,
+                self.model.Lr: lr,
+                self.model.prob: prob
+            }
+
+            _, temp_gvs, fc_score, conv_score, loss = self.sess.run([self.model.accum_ops, self.model.gvs, self.model.fc_pred,
+                                                           self.model.conv_pred, self.model.loss], feed_dict)
+
+            # calc accuracy of the mini batch
+            fc_score = np.reshape(np.array(fc_score),
+                                  (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
+            conv_score = np.reshape(np.array(conv_score), (self.config.batch_size, self.config.n_classes))
+
+            gt_classes = np.nonzero(batch_labels)[1]
+
+            # fusion by addition
+            fus_add = np.add(fc_score, conv_score)
+            predictions_add = np.argmax(fus_add, axis=1)
+            accu_add = accuracy(predictions_add, gt_classes)
+
+            # fusion by multiplication
+            fus_mul = np.multiply(fc_score, conv_score)
+            predictions_mul = np.argmax(fus_mul, axis=1)
+            accu_mul = accuracy(predictions_mul, gt_classes)
+
+            accu_add_batch += accu_add
+            accu_mul_batch += accu_mul
+            loss_batch += loss
+
+        accum = self.sess.run(self.model.accum_vars)
+
+        feed_dict = dict()
+        for i, _grads in enumerate(accum):
+            feed_dict[self.model.accum_vars[i]] = _grads
+
+        # Run the train_step ops to update the weights based on your accumulated gradients
+        self.sess.run(self.model.train_op, feed_dict=feed_dict)
+
+        # divide by number of minibatches to get average
+        accu_add_batch = accu_add_batch / self.config.n_minibatches
+        accu_mul_batch = accu_mul_batch / self.config.n_minibatches
+        loss_batch = loss_batch / self.config.n_minibatches
+
+        return accu_add_batch, accu_mul_batch, loss_batch

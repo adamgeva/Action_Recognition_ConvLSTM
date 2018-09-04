@@ -5,6 +5,7 @@
   "val_interval": 1,
   "basic_lr": 0.0001,
   "batch_size": 1,
+  "n_minibatches": 3,
   "max_to_keep":5,
   "n_fc_inputs" : 1280,
   "n_timesteps" : 40,
