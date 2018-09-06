@@ -51,7 +51,7 @@ class ExampleTrainer(BaseTrain):
 
             # iterate over steps (batches)
             for _ in loop_validate:
-                accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes = self.train_validate_step(lr, False)
+                accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes = self.validate_step(lr)
                 losses_val.append(loss)
                 accs_add_val.append(accu_add)
                 accs_mul_val.append(accu_mul)
@@ -145,8 +145,18 @@ class ExampleTrainer(BaseTrain):
                 self.model.prob: prob
             }
 
-            _, temp_gvs, fc_score, conv_score, loss = self.sess.run([self.model.accum_ops, self.model.gvs, self.model.fc_pred,
-                                                           self.model.conv_pred, self.model.loss], feed_dict)
+            # todo: is there a way to execute only train op?
+            # on the last iteration apply the gradients that were accumulated
+
+            if i < (self.config.n_minibatches - 1):
+
+                _, fc_score, conv_score, loss = self.sess.run([self.model.accum_ops, self.model.fc_pred,
+                                                               self.model.conv_pred, self.model.loss], feed_dict)
+            else:
+                # Run the train_step ops to update the weights based on your accumulated gradients
+                _, _, fc_score, conv_score, loss = self.sess.run([self.model.train_op, self.model.accum_ops,
+                                                                  self.model.fc_pred, self.model.conv_pred,
+                                                                  self.model.loss], feed_dict)
 
             # calc accuracy of the mini batch
             fc_score = np.reshape(np.array(fc_score),
@@ -169,18 +179,10 @@ class ExampleTrainer(BaseTrain):
             accu_mul_batch += accu_mul
             loss_batch += loss
 
-        accum = self.sess.run(self.model.accum_vars)
-
-        feed_dict = dict()
-        for i, _grads in enumerate(accum):
-            feed_dict[self.model.accum_vars[i]] = _grads
-
-        # Run the train_step ops to update the weights based on your accumulated gradients
-        self.sess.run(self.model.train_op, feed_dict=feed_dict)
-
         # divide by number of minibatches to get average
         accu_add_batch = accu_add_batch / self.config.n_minibatches
         accu_mul_batch = accu_mul_batch / self.config.n_minibatches
         loss_batch = loss_batch / self.config.n_minibatches
 
         return accu_add_batch, accu_mul_batch, loss_batch
+

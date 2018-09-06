@@ -40,3 +40,19 @@ def val_reprocess(config, frame):
     #centered_image = res - means  # (4)
     #return centered_image
     return res
+
+
+# read first frames until reaching the first frame to sample from
+def skip_first_frames(vid_capture, first_frame):
+    frame_counter = 0
+    bit = 0
+
+    while (vid_capture.isOpened()) & (frame_counter < (first_frame - 1)) & (bit == 0):
+        flag, frame = vid_capture.read()
+        if flag == 0:
+            print('********************ERROR reading first frames****************************')
+            bit = 1
+            break
+        frame_counter += 1
+
+    return bit, vid_capture

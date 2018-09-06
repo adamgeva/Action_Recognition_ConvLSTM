@@ -130,8 +130,8 @@ class ExampleModel(BaseModel):
 
 
         # Define the training step (part with variable value update)
-        # train_op = opt.apply_gradients([(accum_vars[i], gv[1]) for i, gv in enumerate(gvs)], global_step=self.global_step_tensor)
-        train_op = opt.apply_gradients([(accum_vars[i], tv) for i, tv in enumerate(tvs)], global_step=self.global_step_tensor)
+        train_op = opt.apply_gradients([(accum_vars[i], gv[1]) for i, gv in enumerate(gvs)], global_step=self.global_step_tensor)
+        # train_op = opt.apply_gradients([(accum_vars[i], tv) for i, tv in enumerate(tvs)], global_step=self.global_step_tensor)
 
 
         #train_op = tf.train.AdamOptimizer(Lr).minimize(loss, global_step=self.global_step_tensor)

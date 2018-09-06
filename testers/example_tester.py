@@ -72,7 +72,7 @@ class ExampleTester(BaseTest):
         }
 
         fc_score, conv_score, loss = self.sess.run([self.model.fc_pred, self.model.conv_pred,
-                                                          self.model.loss], feed_dict)
+                                                    self.model.loss], feed_dict)
 
         # calc accuracy of the batch
         fc_score = np.reshape(np.array(fc_score), (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
