@@ -15,7 +15,7 @@ def main():
     # testing mode:
     # capture the config path from a finished experiment
     config_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/experiments/2018-08-27 08:39:10/configs_file.json'
-    data_to_test = 'train'
+    data_to_test = 'test'
 
     # paths
     paths_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/configs/paths.json'
