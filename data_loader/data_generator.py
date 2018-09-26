@@ -6,7 +6,7 @@ import time
 
 
 class DataGenerator:
-    def __init__(self, model, config, sess, data_name, shuffle):
+    def __init__(self, model, config, sess, data_name, shuffle, augment):
         self.config = config
 
         # data_generator receives the model and session because it runs the first part of the model -
@@ -16,6 +16,8 @@ class DataGenerator:
         # read classes dict
         self.label_dict = utils_data.read_classes(config.classInd)
         self.label_dict_inv = {v: k for k, v in self.label_dict.items()}
+
+        self.augment = augment
 
         # load data here (shuffle inside)
         if data_name == 'train':
@@ -65,6 +67,10 @@ class DataGenerator:
                 if bit_correct == 1:
                     print('ERROR: skipping clip...')
                     continue
+
+                # augment example if required
+                if self.augment:
+                    frames = utils_video.augment_frames(frames)
 
                 # assign to the big array
                 batch_frames[example_ind] = frames
@@ -163,10 +169,12 @@ def get_clip_frames(config, video_path):
     clip_frames = []
     bit = 0
     capture = cv2.VideoCapture(video_path)
+    fps = capture.get(cv2.CAP_PROP_FPS)
 
+    frame_gap = int(round(fps / config.target_fps))
     frame_num = 0
     # extract features
-    while (capture.isOpened()) & (frame_num < config.n_steps) & (bit == 0):
+    while (capture.isOpened()) & (int(round(frame_num / frame_gap)) < config.n_steps) & (bit == 0):
         flag, frame = capture.read()
         if flag == 0:
             bit = 1
@@ -178,9 +186,12 @@ def get_clip_frames(config, video_path):
         #cv2.imshow("Vid", frame)
         #key_pressed = cv2.waitKey(10)  # Escape to exit
 
-        # process frame
-        centered_image = utils_video.val_reprocess(config, frame)
-        clip_frames.append(centered_image)
+        # process frame (according to the correct frame rate)
+        if frame_num % frame_gap == 0:
+            centered_image = utils_video.val_reprocess(config, frame)
+            clip_frames.append(centered_image)
+            #cv2.imshow("Vid", frame)
+            #key_pressed = cv2.waitKey(30)  # Escape to exit
 
         frame_num += 1
 

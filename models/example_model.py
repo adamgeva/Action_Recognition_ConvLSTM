@@ -90,6 +90,11 @@ class ExampleModel(BaseModel):
         fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
         fc_img_re = tf.stop_gradient(tf.squeeze(fc_img_re, [2, 3]))
 
+        #todo:stop grad
+        #conv_img_re = tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
+        #fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
+        #fc_img_re = tf.squeeze(fc_img_re, [2, 3])
+
         fc_img_out = self.FC_LSTM(fc_img_re, True)
         conv_img_out, alphas, v = self.CONV_LSTM(conv_img_re, True)
 
@@ -113,8 +118,10 @@ class ExampleModel(BaseModel):
 
         opt = tf.train.AdamOptimizer(Lr)
 
+        # todo: fix not to include mn
         # Retrieve all trainable variables defined in graph
         tvs = [v for v in tf.trainable_variables() if v.name[:10] != 'mobile_net']
+        # tvs = [v for v in tf.trainable_variables()]
 
         # Creation of a list of variables with the same shape as the trainable ones
         # initialized with 0s
@@ -126,7 +133,7 @@ class ExampleModel(BaseModel):
 
         # Adds to each element from the list you initialized earlier with zeros its gradient
         # (works because accum_vars and gvs are in the same order)
-        accum_ops = [accum_vars[i].assign_add(gv[0]) for i, gv in enumerate(gvs)]
+        accum_ops = [accum_vars[i].assign_add(gv[0]) for i, gv in enumerate(gvs) if gv[0] is not None]
 
 
         # Define the training step (part with variable value update)

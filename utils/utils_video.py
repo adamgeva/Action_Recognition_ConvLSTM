@@ -1,6 +1,9 @@
 import random
 import cv2
 import re
+from imgaug import augmenters as iaa
+import numpy as np
+
 
 # select a clip from all the training clips
 def select_clip(train_set_length, train_names, data_dict):
@@ -56,3 +59,28 @@ def skip_first_frames(vid_capture, first_frame):
         frame_counter += 1
 
     return bit, vid_capture
+
+
+# performs the same augmentation on all frames
+def augment_frames(frames):
+    frames = (frames + 1.0) * 128.
+    frames = frames.astype('uint8')
+    seq = iaa.Sequential([
+        iaa.Affine(scale=(0.5, 3.0)),
+        iaa.Add((-20, 20)),
+        #iaa.AddToHueAndSaturation((-20, 20), per_channel=True),
+        iaa.ContrastNormalization(alpha=(0.5,1.5)),
+        iaa.Grayscale(alpha=(0.0, 1.0)),
+        iaa.Fliplr(0.5),  # horizontally flip 50% of the images
+        #iaa.Affine(rotate=(0, 0))
+    ])
+
+    seq_det = seq.to_deterministic() # call this for each batch again, NOT only once at the start
+    frames_aug = np.zeros(frames.shape)
+    for i in range(frames.shape[0]):
+        frame_aug = seq_det.augment_image(frames[i])
+        #cv2.imshow('ImageWindow', frame_aug)
+        #cv2.waitKey()
+        frames_aug[i] = frame_aug
+    frames_aug = frames_aug.astype('float32') / 128. - 1
+    return frames_aug
