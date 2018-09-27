@@ -10,13 +10,6 @@ from utils.utils import get_args
 import sys
 
 
-#def get_coco_mobile_net(sess):
-#    new_saver = tf.train.import_meta_graph('/home/ADAMGE/action_recognition/models/mobile_net_coco/model.ckpt.meta')
-#    new_saver.restore(sess, '/home/ADAMGE/action_recognition/models/mobile_net_coco/model.ckpt')
-#    # Addes loss and train.
-#    logits = tf.get_collection("logits")[0]
-
-
 def main():
 
     new_exp = input("Is this a new experiment? [Y/N]")
@@ -31,10 +24,8 @@ def main():
         print("Wrong input")
         exit()
 
-
     paths_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/configs/paths.json'
     config = process_config(config_filename, paths_filename, new_exp)
-
 
     # create the experiments dirs and write the JSON file to the dir
     create_dirs([config.summary_dir, config.checkpoint_dir], config_filename)
@@ -44,8 +35,6 @@ def main():
 
     # create tensorflow session
     sess = tf.Session(config=sess_config)
-
-    #get_coco_mobile_net(sess)
 
     # create an instance of the model you want
     model = ExampleModel(config)
