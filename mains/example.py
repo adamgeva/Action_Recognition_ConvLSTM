@@ -10,6 +10,13 @@ from utils.utils import get_args
 import sys
 
 
+#def get_coco_mobile_net(sess):
+#    new_saver = tf.train.import_meta_graph('/home/ADAMGE/action_recognition/models/mobile_net_coco/model.ckpt.meta')
+#    new_saver.restore(sess, '/home/ADAMGE/action_recognition/models/mobile_net_coco/model.ckpt')
+#    # Addes loss and train.
+#    logits = tf.get_collection("logits")[0]
+
+
 def main():
 
     new_exp = input("Is this a new experiment? [Y/N]")
@@ -37,6 +44,8 @@ def main():
 
     # create tensorflow session
     sess = tf.Session(config=sess_config)
+
+    #get_coco_mobile_net(sess)
 
     # create an instance of the model you want
     model = ExampleModel(config)
