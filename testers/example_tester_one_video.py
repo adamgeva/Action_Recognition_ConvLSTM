@@ -25,38 +25,29 @@ class ExampleTesterOneSeq(BaseTest):
 
     def test(self):
 
-        losses_val = []
         accs_add_val = []
         accs_mul_val = []
         predictions_add_val = []
         predictions_mul_val = []
         gt_classes_val = []
 
-        loop_test = tqdm(range(self.num_iter_data))
+        # read video frames
+        while frames
 
-        # iterate over steps (batches)
-        for _ in loop_test:
+            # run faster to detect region every 13 frames
+
+            # get segments block of previous 13 frames - bb interpolation
+            # return classes of each block
+
+            # run model to get predictions
             accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes = self.test_step()
-            losses_val.append(loss)
-            accs_add_val.append(accu_add)
-            accs_mul_val.append(accu_mul)
 
-            # collect also the actual predictions to create confusion matrix
-            predictions_add_val = np.append(predictions_add_val, predictions_add)
-            predictions_mul_val = np.append(predictions_mul_val, predictions_mul)
-            gt_classes_val = np.append(gt_classes_val, gt_classes)
+            # draw predictions
 
-        loss_val_epoch = np.mean(losses_val)
-        accs_add_val_epoch = np.mean(accs_add_val)
-        accs_mul_val_epoch = np.mean(accs_mul_val)
+            # plot frame
 
-        cur_it = self.model.global_step_tensor.eval(self.sess)
-        summaries_dict = {
-            'loss_validation': loss_val_epoch,
-            'accuracy_add_validation': accs_add_val_epoch,
-            'accuracy_multiply_validation': accs_mul_val_epoch
-        }
-        self.logger.summarize(cur_it, summaries_dict=summaries_dict)
+
+
 
         labels = sorted(self.data_test.label_dict, key=self.data_test.label_dict.get)
         self.logger.confusion_mat(cur_it, labels, [self.data_test.label_dict_inv[int(i)] for i in gt_classes_val],
@@ -66,7 +57,7 @@ class ExampleTesterOneSeq(BaseTest):
     def test_step(self):
 
         prob = 1.0
-        batch_frames, batch_labels = self.data_test.next_batch()
+        batch_frames, batch_labels = block segment extractor
 
         feed_dict = {
             self.model.is_training: False,
