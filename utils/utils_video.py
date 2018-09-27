@@ -66,11 +66,11 @@ def augment_frames(frames):
     frames = (frames + 1.0) * 128.
     frames = frames.astype('uint8')
     seq = iaa.Sequential([
-        iaa.Affine(scale=(0.5, 2.0)),
-        #iaa.Add((-20, 20)),
+        iaa.Affine(scale=(0.5, 3.0)),
+        iaa.Add((-20, 20)),
         #iaa.AddToHueAndSaturation((-20, 20), per_channel=True),
-        #iaa.ContrastNormalization(alpha=(0.5,1.5)),
-        #iaa.Grayscale(alpha=(0.0, 1.0)),
+        iaa.ContrastNormalization(alpha=(0.5,1.5)),
+        iaa.Grayscale(alpha=(0.0, 1.0)),
         iaa.Fliplr(0.5),  # horizontally flip 50% of the images
         #iaa.Affine(rotate=(0, 0))
     ])
