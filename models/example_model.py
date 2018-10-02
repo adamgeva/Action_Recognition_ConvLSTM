@@ -116,34 +116,36 @@ class ExampleModel(BaseModel):
         conv_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=conv_result, labels=ys))
         loss = fc_loss + conv_loss
 
-        opt = tf.train.AdamOptimizer(Lr)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            opt = tf.train.AdamOptimizer(Lr)
 
-        # todo: fix not to include mn
-        # Retrieve all trainable variables defined in graph
-        #tvs = [v for v in tf.trainable_variables() if v.name[:10] != 'mobile_net']
-        tvs = [v for v in tf.trainable_variables()]
+            # todo: fix not to include mn
+            # Retrieve all trainable variables defined in graph
+            #tvs = [v for v in tf.trainable_variables() if v.name[:10] != 'mobile_net']
+            tvs = [v for v in tf.trainable_variables()]
 
-        # Creation of a list of variables with the same shape as the trainable ones
-        # initialized with 0s
-        accum_vars = [tf.Variable(tf.zeros_like(tv.initialized_value()), trainable=False) for tv in tvs]
-        zero_ops = [tv.assign(tf.zeros_like(tv)) for tv in accum_vars]
+            # Creation of a list of variables with the same shape as the trainable ones
+            # initialized with 0s
+            accum_vars = [tf.Variable(tf.zeros_like(tv.initialized_value()), trainable=False) for tv in tvs]
+            zero_ops = [tv.assign(tf.zeros_like(tv)) for tv in accum_vars]
 
-        # Calls the compute_gradients function of the optimizer to obtain... the list of gradients
-        gvs = opt.compute_gradients(loss, tvs)
+            # Calls the compute_gradients function of the optimizer to obtain... the list of gradients
+            gvs = opt.compute_gradients(loss, tvs)
 
-        # Adds to each element from the list you initialized earlier with zeros its gradient
-        # (works because accum_vars and gvs are in the same order)
-        accum_ops = [accum_vars[i].assign_add(gv[0]) for i, gv in enumerate(gvs) if gv[0] is not None]
-
-
-        # Define the training step (part with variable value update)
-        train_op = opt.apply_gradients([(accum_vars[i], gv[1]) for i, gv in enumerate(gvs)], global_step=self.global_step_tensor)
-        # train_op = opt.apply_gradients([(accum_vars[i], tv) for i, tv in enumerate(tvs)], global_step=self.global_step_tensor)
+            # Adds to each element from the list you initialized earlier with zeros its gradient
+            # (works because accum_vars and gvs are in the same order)
+            accum_ops = [accum_vars[i].assign_add(gv[0]) for i, gv in enumerate(gvs) if gv[0] is not None]
 
 
-        #train_op = tf.train.AdamOptimizer(Lr).minimize(loss, global_step=self.global_step_tensor)
+            # Define the training step (part with variable value update)
+            train_op = opt.apply_gradients([(accum_vars[i], gv[1]) for i, gv in enumerate(gvs)], global_step=self.global_step_tensor)
+            # train_op = opt.apply_gradients([(accum_vars[i], tv) for i, tv in enumerate(tvs)], global_step=self.global_step_tensor)
 
-        #saver = tf.train.Saver()
+
+            #train_op = tf.train.AdamOptimizer(Lr).minimize(loss, global_step=self.global_step_tensor)
+
+            #saver = tf.train.Saver()
 
         # maintain the complete model nodes and points of interaction
         self.fc_img = fc_img
