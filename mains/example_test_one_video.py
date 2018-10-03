@@ -47,10 +47,9 @@ def faster_config():
     return args, MODEL
 
 
-
 def main():
-
-    clip_full_path = '/hdd/UCF-ARG/rooftop_clips_stabilized/running/person02_01_rooftop_running.avi'
+    #clip_full_path = '/hdd/UCF-ARG/rooftop_clips_stabilized/walking/person09_02_rooftop_walking.avi'
+    clip_full_path = '/hdd/SDHA2010/Output_Videos/5_4.avi'
     # testing mode:
     # capture the config path from a finished experiment
     config_filename = '/home/ADAMGE/action_recognition/models/exp14/configs_file.json'

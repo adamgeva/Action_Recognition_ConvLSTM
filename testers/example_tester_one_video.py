@@ -32,27 +32,44 @@ class ExampleTesterOneSeq(BaseTest):
 
     def test(self):
 
+        # object tracker
+        OPENCV_OBJECT_TRACKERS = {
+            "csrt": cv2.TrackerCSRT_create,
+            "kcf": cv2.TrackerKCF_create,
+            "boosting": cv2.TrackerBoosting_create,
+            "mil": cv2.TrackerMIL_create,
+            "tld": cv2.TrackerTLD_create,
+            "medianflow": cv2.TrackerMedianFlow_create,
+            "mosse": cv2.TrackerMOSSE_create
+        }
+        initBB = False
+        # grab the appropriate object tracker using our dictionary of
+        # OpenCV object tracker objects
+        tracker = OPENCV_OBJECT_TRACKERS["csrt"]()
+
+        # video capture
         capture = cv2.VideoCapture(self.clip_path)
-
-
         fps = capture.get(cv2.CAP_PROP_FPS)
-
+        # used to deal with frame rate corrections
         frame_gap = int(round(fps / self.config.target_fps))
         frame_num = 0
+        frame_height = int(capture.get(4))
+        frame_width = int(capture.get(3))
 
-        frame_height = int(capture.get(3))
-        frame_width = int(capture.get(4))
-
+        # initialize the frame fifo
         curr_fifo = VideoFIFO(self.config, self.config.n_timesteps, frame_width, frame_height)
 
         flag = 1
         # read video frames
-        while flag is not 0:
+        while True:
             flag, frame = capture.read()
 
-            if frame_num % frame_gap == 0:
-                curr_fifo.add_frame(frame)
+            # end of movie
+            if flag==0:
+                break
 
+            # use FASTER for detection as long as the tracker is not initialized
+            if not initBB:
                 # run faster to detect region every frame
                 res = predict(self.faster_pred, frame)
 
@@ -61,23 +78,54 @@ class ExampleTesterOneSeq(BaseTest):
                 # skip if no detection
                 if human_bb != [0,0,0,0]:
                     for human_detection in human_bb:
-                        curr_block = curr_fifo.recover_block(human_detection, self.config.new_frame_size[0],
-                                                             self.config.new_frame_size[1])
+                        # start OpenCV object tracker using the supplied bounding box
+                        # coordinates, then start the FPS throughput estimator as well
+                        human_detection_tup = (human_detection[0], human_detection[1],
+                                               human_detection[2]-human_detection[0], human_detection[3]-human_detection[1])
+                        tracker.init(frame, human_detection_tup)
+                        initBB = True
+                        break
 
-                        # run model to get predictions
-                        predictions_add, predictions_mul = self.test_step(curr_block)
+            else:
+                # grab the new bounding box coordinates of the object
+                (success, human_detection_tup) = tracker.update(frame)
+                (x, y, w, h) = [int(v) for v in human_detection_tup]
+                human_detection = [x, y, x + w, y + h]
 
-                        # draw predictions
-                        print(self.label_dict_inv[int(predictions_add)])
-                        print(self.label_dict_inv[int(predictions_mul)])
-                        cv2.rectangle(frame, (human_detection[0], human_detection[1]), (human_detection[2], human_detection[3]),
-                                      color=(0, 0, 255), thickness=1)
+            if frame_num % frame_gap == 0:
+                # add to fifo according to the correct frame rate
+                curr_fifo.add_frame(frame)
+
+                curr_block = curr_fifo.recover_block(human_detection, self.config.new_frame_size[0],
+                                                     self.config.new_frame_size[1], frame_num)
+
+                # run model to get predictions
+                predictions_add, predictions_mul = self.test_step(curr_block)
+
+                # draw predictions
+                print(self.label_dict_inv[int(predictions_add)])
+                print(self.label_dict_inv[int(predictions_mul)])
+
+            frame_rec = frame.copy()
+            cv2.rectangle(frame_rec, (human_detection[0], human_detection[1]), (human_detection[2], human_detection[3]),
+                          color=(0, 0, 255), thickness=1)
+
+            cv2.putText(frame_rec, self.label_dict_inv[int(predictions_mul)],
+                        (human_detection[0], human_detection[1]),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 0, 255),
+                        1)
 
             # plot frame
-            cv2.imshow('vid', frame)
+            cv2.imshow('vid', frame_rec)
             cv2.waitKey(100)
             #cv2.destroyAllWindows()
             frame_num += 1
+
+        # When everything done, release the capture
+        capture.release()
+        cv2.destroyAllWindows()
 
     def test_step(self, block):
 
