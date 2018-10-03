@@ -36,9 +36,9 @@ class VideoFIFO:
         block = np.zeros([self.time_depth, self.config.frame_size[0], self.config.frame_size[1], 3])
 
         # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(str(frame_num) + 'test.avi', fourcc, 10,
-                              (new_width, new_height))
+        #fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        #out = cv2.VideoWriter(str(frame_num) + 'test.avi', fourcc, 10,
+        #                      (new_width, new_height))
 
         for i in range(self.time_depth):
             #cv2.imshow('Window', self.fifo[12])
@@ -46,13 +46,13 @@ class VideoFIFO:
             new_frame = self.fifo[i][int(center_point[0] - new_height // 2):int(center_point[0] + new_height // 2),
                         int(center_point[1] - new_width // 2):int(center_point[1] + new_width // 2)]
             # adjust image size
-            out.write(new_frame)
+        #    out.write(new_frame)
             #cv2.imshow('Window2', new_frame)
             #cv2.waitKey(0)
 
             centered_image = utils_video.val_reprocess(self.config, new_frame)
             block[i] = centered_image
 
-        out.release()
+        #out.release()
         return block
 
