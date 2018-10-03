@@ -239,8 +239,11 @@ class ExampleModel(BaseModel):
 
     # just creates the saver node
     def init_lstm_saver(self):
+        # todo: correct patch
+        # mn_copy_vars = ['Variable_' + str(i) + ':0' for i in range(25, 183)]
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         # this saver deals with all cariables except mobile net.
+        # restore_var = [v for v in tf.all_variables() if v.name[:10] != 'mobile_net' and (v.name in mn_copy_vars)==False]
         restore_var = [v for v in tf.all_variables() if v.name[:10] != 'mobile_net']
         with open('restore_var.txt', 'w') as f:
             for item in restore_var:
