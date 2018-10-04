@@ -6,6 +6,7 @@ import gc
 import cv2
 from train_faster import predict
 from utils.video_fifo import VideoFIFO
+from utils.utils_video import filter_bb
 import utils.utils_data as utils_data
 
 def accuracy(a, b):
@@ -56,6 +57,9 @@ class ExampleTesterOneSeq(BaseTest):
         frame_height = int(capture.get(4))
         frame_width = int(capture.get(3))
 
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        out = cv2.VideoWriter('person09_03_rooftop_digging_det.avi', fourcc, fps, (frame_width, frame_height))
+
         # initialize the frame fifo
         curr_fifo = VideoFIFO(self.config, self.config.n_timesteps, frame_width, frame_height)
 
@@ -74,7 +78,7 @@ class ExampleTesterOneSeq(BaseTest):
                 res = predict(self.faster_pred, frame)
 
                 # get segments block of previous 13 frames - bb interpolation
-                human_bb = self.filter_bb(res)
+                human_bb = filter_bb(res)
                 # skip if no detection
                 if human_bb != [0,0,0,0]:
                     for human_detection in human_bb:
@@ -117,6 +121,8 @@ class ExampleTesterOneSeq(BaseTest):
                         (0, 0, 255),
                         1)
 
+            out.write(frame_rec)
+
             # plot frame
             cv2.imshow('vid', frame_rec)
             cv2.waitKey(100)
@@ -125,6 +131,7 @@ class ExampleTesterOneSeq(BaseTest):
 
         # When everything done, release the capture
         capture.release()
+        out.release()
         cv2.destroyAllWindows()
 
     def test_step(self, block):
@@ -153,22 +160,3 @@ class ExampleTesterOneSeq(BaseTest):
         predictions_mul = np.argmax(fus_mul, axis=1)
 
         return predictions_add, predictions_mul
-
-    @staticmethod
-    def filter_bb(res):
-        bb_man = []
-        no_man_detection = True
-
-        for detection in res:
-            bb = detection[0]
-            score = detection[1]
-            id = detection[2]
-            if (id == 1) and score > 0.8:  # man detected
-                bb_man.append(bb)
-                no_man_detection = False
-
-        if no_man_detection:
-            print('no man detection!!!')
-            bb_man = [0, 0, 0, 0]
-
-        return bb_man

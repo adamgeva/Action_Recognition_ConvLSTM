@@ -119,7 +119,7 @@ pbar.close()
 
 
 
-print(main_run_faster())
+#print(main_run_faster())
 
 
 

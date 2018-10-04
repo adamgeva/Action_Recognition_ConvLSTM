@@ -31,7 +31,7 @@ def main():
     model = ExampleModel(config)
 
     # create your data generator
-    data_test = DataGenerator(model, config, sess, data_to_test, shuffle=False)
+    data_test = DataGenerator(model, config, sess, data_to_test, shuffle=False, augment=False)
 
     # create tensorboard logger
     logger = Logger(sess, config)

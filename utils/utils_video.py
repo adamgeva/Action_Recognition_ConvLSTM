@@ -84,3 +84,22 @@ def augment_frames(frames):
         frames_aug[i] = frame_aug
     frames_aug = frames_aug.astype('float32') / 128. - 1
     return frames_aug
+
+
+def filter_bb(res):
+    bb_man = []
+    no_man_detection = True
+
+    for detection in res:
+        bb = detection[0]
+        score = detection[1]
+        id = detection[2]
+        if (id == 1) and score > 0.8:  # man detected
+            bb_man.append(bb)
+            no_man_detection = False
+
+    if no_man_detection:
+        print('no man detection!!!')
+        bb_man = [0, 0, 0, 0]
+
+    return bb_man

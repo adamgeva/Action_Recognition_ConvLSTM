@@ -48,11 +48,11 @@ def faster_config():
 
 
 def main():
-    clip_full_path = '/hdd/UCF-ARG/rooftop_clips_stabilized/waving/person11_03_rooftop_waving.avi'
+    clip_full_path = '/hdd/UCF-ARG/rooftop_clips_stabilized/digging/person09_03_rooftop_digging.avi'
     #clip_full_path = '/hdd/SDHA2010/Output_Videos/5_4.avi'
     # testing mode:
     # capture the config path from a finished experiment
-    config_filename = '/home/ADAMGE/action_recognition/models/exp14/configs_file.json'
+    config_filename = '/home/ADAMGE/action_recognition/models/exp22/configs_file.json'
 
     paths_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/configs/paths.json'
     config = process_config(config_filename, paths_filename, 'N')
