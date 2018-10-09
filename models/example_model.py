@@ -44,7 +44,9 @@ class ExampleModel(BaseModel):
         self.loss = None
         self.prob = None
         self.alphas = None
+        self.alphas_fc = None
         self.v = None
+        self.im_outputs = None
         # todo: is that the correct initialization?
         self.is_training = None
 
@@ -95,8 +97,8 @@ class ExampleModel(BaseModel):
         #fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
         #fc_img_re = tf.squeeze(fc_img_re, [2, 3])
 
-        fc_img_out = self.FC_LSTM(fc_img_re, True)
-        conv_img_out, alphas, v = self.CONV_LSTM(conv_img_re, True)
+        fc_img_out, alphas_fc = self.FC_LSTM(fc_img_re, True)
+        conv_img_out, alphas, v, im_outputs = self.CONV_LSTM(conv_img_re, True)
 
         fc_img_drop = tf.nn.dropout(fc_img_out, prob)
         conv_img_drop = tf.nn.dropout(conv_img_out, prob)
@@ -164,7 +166,9 @@ class ExampleModel(BaseModel):
         self.loss = loss
         self.prob = prob
         self.alphas = alphas
+        self.alphas_fc = alphas_fc
         self.v = v
+        self.im_outputs = im_outputs
         self.is_training = is_training
 
         self.input_img = input_img
@@ -184,14 +188,15 @@ class ExampleModel(BaseModel):
         outputs_spa, final_state_spa = tf.nn.dynamic_rnn(mlstm_cell_spa, X_spa, initial_state=init_state_spa,
                                                          time_major=False)
 
-        attention_output_spa = fc_attention_sum(outputs_spa, self.config.fc_attention_size)
+        alphas = 0
+        attention_output_spa, alphas = fc_attention_sum(outputs_spa, self.config.fc_attention_size)
         if attention:
             attention_output_spa = tf.layers.batch_normalization(attention_output_spa)
-            return attention_output_spa
+            return attention_output_spa, alphas
         else:
             outputs_spa = tf.layers.batch_normalization(outputs_spa)
             outputs_spa = tf.reduce_sum(outputs_spa, axis=1)
-            return outputs_spa
+            return outputs_spa, alphas
 
     def CONV_LSTM(self, conv_img, attention):
         img_cell = ConvLSTMCell(self.config.conv_input_shape, self.config.n_filters, self.config.kernel)
@@ -199,7 +204,7 @@ class ExampleModel(BaseModel):
         if attention:
             img_attention_output, alphas, v = conv_attention_sum(img_outputs, self.config.attention_kernel)
             img_attention_output = tf.layers.batch_normalization(img_attention_output)
-            return img_attention_output, alphas, v
+            return img_attention_output, alphas, v, img_outputs
         else:
             alphas = v = 0
             img_outputs = tf.layers.batch_normalization(img_outputs)

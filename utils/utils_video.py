@@ -33,6 +33,15 @@ def line_to_path(line, ucf_path):
     return curr_video_full_path, curr_video_class
 
 
+# takes a line and returns the full path and class of the vid line
+def line_to_path_SDHA(line, SDHA_path):
+    video_name = line.split(" ")[0]
+    curr_video_class = video_name.split('_')[0]
+    curr_video_full_path = SDHA_path + curr_video_class + '/' + video_name
+
+    return curr_video_full_path, curr_video_class
+
+
 # modifies the RGB seq and size to fit the input size of mobile net
 def val_reprocess(config, frame):
     # for mobile net - input value is -1 to 1
@@ -66,7 +75,7 @@ def augment_frames(frames):
     frames = (frames + 1.0) * 128.
     frames = frames.astype('uint8')
     seq = iaa.Sequential([
-        iaa.Affine(scale=(0.5, 2.0)),
+        iaa.Affine(scale=(1/1.6, (1.6))),
         #iaa.Add((-20, 20)),
         #iaa.AddToHueAndSaturation((-20, 20), per_channel=True),
         #iaa.ContrastNormalization(alpha=(0.5,1.5)),
@@ -94,7 +103,7 @@ def filter_bb(res):
         bb = detection[0]
         score = detection[1]
         id = detection[2]
-        if (id == 1) and score > 0.8:  # man detected
+        if (id == 1) and score > 0.6:  # man detected
             bb_man.append(bb)
             no_man_detection = False
 

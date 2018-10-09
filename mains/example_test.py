@@ -3,6 +3,7 @@ import tensorflow as tf
 from data_loader.data_generator import DataGenerator
 from models.example_model import ExampleModel
 from testers.example_tester import ExampleTester
+from testers.example_tester_with_attention_output import ExampleTesterPlotAttention
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
@@ -14,8 +15,8 @@ def main():
 
     # testing mode:
     # capture the config path from a finished experiment
-    config_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/experiments/2018-08-27 08:39:10/configs_file.json'
-    data_to_test = 'train'
+    config_filename = '/home/ADAMGE/action_recognition/models/exp26/configs_file.json'
+    data_to_test = 'test'
 
     # paths
     paths_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/configs/paths.json'
@@ -37,7 +38,7 @@ def main():
     logger = Logger(sess, config)
 
     # create trainer and pass all the previous components to it
-    tester = ExampleTester(sess, model, data_test, config, logger)
+    tester = ExampleTesterPlotAttention(sess, model, data_test, config, logger)
 
     # restore mobile net
     model.restore_mobile_net(sess)

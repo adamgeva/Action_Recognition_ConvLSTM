@@ -27,7 +27,7 @@ class DataGenerator:
         else:
             data_list = config.test_list
 
-        self.lines, self.labels, self.len_lines = utils_data.read_data(data_list, self.label_dict, shuffle)
+        self.lines, self.labels, self.len_lines = utils_data.read_data(data_list, self.label_dict, shuffle, config.data)
 
         # feeder state
         self._curr_line_num = 0
@@ -89,7 +89,12 @@ class DataGenerator:
     def get_next_example(self):
         # returns the video full path, class, first frame to read from
         line = self.lines[self._curr_line_num]
-        curr_video_full_path, curr_video_class = utils_video.line_to_path(line, self.config.UCF_ARG_path)
+        if self.config.data == "UCF":
+            curr_video_full_path, curr_video_class = utils_video.line_to_path(line, self.config.UCF_ARG_path)
+        elif self.config.data == "SDHA":
+            curr_video_full_path, curr_video_class = utils_video.line_to_path_SDHA(line, self.config.SDHA_2010_path)
+        elif self.config.data == "Combined":
+            curr_video_full_path, curr_video_class = utils_video.line_to_path_SDHA(line, self.config.Combined_path)
         self.update_state()
         return curr_video_full_path, curr_video_class
 

@@ -4,10 +4,14 @@ import numpy as np
 import tensorflow as tf
 import gc
 import cv2
-from train_faster import predict
+from train_faster import predict, main_run_faster
+
 from utils.video_fifo import VideoFIFO
 from utils.utils_video import filter_bb
 import utils.utils_data as utils_data
+
+import copy
+
 
 def accuracy(a, b):
     c = np.equal(a, b).astype(float)
@@ -45,8 +49,7 @@ class ExampleTesterOneSeq(BaseTest):
         }
         initBB = False
         # grab the appropriate object tracker using our dictionary of
-        # OpenCV object tracker objects
-        tracker = OPENCV_OBJECT_TRACKERS["csrt"]()
+
 
         # video capture
         capture = cv2.VideoCapture(self.clip_path)
@@ -58,10 +61,16 @@ class ExampleTesterOneSeq(BaseTest):
         frame_width = int(capture.get(3))
 
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('person09_03_rooftop_digging_det.avi', fourcc, fps, (frame_width, frame_height))
+        out = cv2.VideoWriter('IR_example.avi', fourcc, fps, (frame_width, frame_height))
 
         # initialize the frame fifo
         curr_fifo = VideoFIFO(self.config, self.config.n_timesteps, frame_width, frame_height)
+
+        # initialize OpenCV's special multi-object tracker
+        trackers = cv2.MultiTracker_create()
+
+        detections = []
+        predictions = []
 
         flag = 1
         # read video frames
@@ -79,47 +88,77 @@ class ExampleTesterOneSeq(BaseTest):
 
                 # get segments block of previous 13 frames - bb interpolation
                 human_bb = filter_bb(res)
+
+                human_bb = [0,0,0,0]
                 # skip if no detection
-                if human_bb != [0,0,0,0]:
-                    for human_detection in human_bb:
+                if np.all([x == 0 for x in human_bb]):
+                    # select the bounding box of the object we want to track (make
+                    # sure you press ENTER or SPACE after selecting the ROI)
+                    human_bb = cv2.selectROI("Frame", frame, fromCenter=False,
+                                           showCrosshair=True)
+
+                    # OpenCV object tracker objects
+                    tracker = OPENCV_OBJECT_TRACKERS["csrt"]()
+
+                    # start OpenCV object tracker using the supplied bounding box
+
+                    trackers.add(tracker, frame, human_bb)
+                    human_detection_det = (human_bb[0], human_bb[1], human_bb[2] + human_bb[0], human_bb[3] + human_bb[1])
+                    detections.append(copy.copy(human_detection_det))
+                    predictions.append(0)
+
+                else:
+                    for det in human_bb:
+                        # OpenCV object tracker objects
+                        tracker = OPENCV_OBJECT_TRACKERS["csrt"]()
+
                         # start OpenCV object tracker using the supplied bounding box
                         # coordinates, then start the FPS throughput estimator as well
-                        human_detection_tup = (human_detection[0], human_detection[1],
-                                               human_detection[2]-human_detection[0], human_detection[3]-human_detection[1])
-                        tracker.init(frame, human_detection_tup)
-                        initBB = True
-                        break
+                        human_detection_tup = (det[0], det[1], det[2]-det[0], det[3]-det[1])
+
+                        trackers.add(tracker, frame, human_detection_tup)
+
+                        detections.append(copy.copy(det))
+                        predictions.append(0)
+
+                initBB = True
 
             else:
-                # grab the new bounding box coordinates of the object
-                (success, human_detection_tup) = tracker.update(frame)
-                (x, y, w, h) = [int(v) for v in human_detection_tup]
-                human_detection = [x, y, x + w, y + h]
+
+                (success, human_detection_tups) = trackers.update(frame)
+                for i, human_detection_tuple in enumerate(human_detection_tups):
+                    # grab the new bounding box coordinates of the object
+                    (x, y, w, h) = [int(v) for v in human_detection_tuple]
+                    human_detection = [x, y, x + w, y + h]
+                    detections[i] = human_detection
 
             if frame_num % frame_gap == 0:
                 # add to fifo according to the correct frame rate
                 curr_fifo.add_frame(frame)
 
-                curr_block = curr_fifo.recover_block(human_detection, self.config.new_frame_size[0],
-                                                     self.config.new_frame_size[1], frame_num)
+                for i, human_det in enumerate(detections):
+                    curr_block = curr_fifo.recover_block(human_det, self.config.new_frame_size[0],
+                                                         self.config.new_frame_size[1], frame_num)
 
-                # run model to get predictions
-                predictions_add, predictions_mul = self.test_step(curr_block)
-
-                # draw predictions
-                print(self.label_dict_inv[int(predictions_add)])
-                print(self.label_dict_inv[int(predictions_mul)])
+                    # run model to get predictions
+                    predictions_add, predictions_mul = self.test_step(curr_block)
+                    predictions[i] = predictions_mul
+                    # draw predictions
+                    print(self.label_dict_inv[int(predictions_add)])
+                    print(self.label_dict_inv[int(predictions_mul)])
 
             frame_rec = frame.copy()
-            cv2.rectangle(frame_rec, (human_detection[0], human_detection[1]), (human_detection[2], human_detection[3]),
-                          color=(0, 0, 255), thickness=1)
 
-            cv2.putText(frame_rec, self.label_dict_inv[int(predictions_mul)],
-                        (human_detection[0], human_detection[1]),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5,
-                        (0, 0, 255),
-                        1)
+            for i, h in enumerate(detections):
+                cv2.rectangle(frame_rec, (h[0], h[1]), (h[2], h[3]),
+                              color=(0, 0, 255), thickness=1)
+
+                cv2.putText(frame_rec, self.label_dict_inv[int(predictions[i])],
+                            (h[0], h[1]),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (0, 0, 255),
+                            1)
 
             out.write(frame_rec)
 

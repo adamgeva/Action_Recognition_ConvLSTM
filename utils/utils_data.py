@@ -19,7 +19,7 @@ def read_classes(class_path):
     return label_dict
 
 
-def read_data(list_path, label_dict, is_shuffle):
+def read_data(list_path, label_dict, is_shuffle, data):
     # given path of lines of files - reads the lines, parse the class and returns both
     # Also shuffles the data if this is the train set
 
@@ -39,8 +39,13 @@ def read_data(list_path, label_dict, is_shuffle):
     # read train labels
     labels = []
     for video in lines:
-        x = video.split(" ")[0].split('_')[-1][:-4]
-        video_class = re.split('(\d+)', x)[0]
+        if data == "UCF":
+            x = video.split(" ")[0].split('_')[-1][:-4]
+            video_class = re.split('(\d+)', x)[0]
+        elif data == "SDHA":
+            video_class = video.split('_')[0]
+        elif data == "Combined":
+            video_class = video.split('_')[0]
 
         ground_label = label_dict[video_class]
         labels.append(ground_label)

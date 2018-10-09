@@ -52,5 +52,4 @@ def fc_attention_sum(inputs, attention_size, time_major=False):
     alphas = exps / tf.reshape(tf.reduce_sum(exps, 1), [-1, 1])                                                # / = [B,1]      alphas = [B,T] 
     output = tf.reduce_sum(inputs * tf.reshape(alphas, [-1, sequence_length, 1]), 1)                           #[B,T,D]*[B,T,1] = [B,T,D]  output = [B,D]
 
-
-    return output
+    return output, alphas
