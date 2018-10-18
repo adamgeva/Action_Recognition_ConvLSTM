@@ -93,14 +93,14 @@ class ExampleModel(BaseModel):
 
         # todo: get the shape from output!
         # reshape batch to have n_steps dimension
-        conv_img_re = tf.stop_gradient(tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels]))
-        fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
-        fc_img_re = tf.stop_gradient(tf.squeeze(fc_img_re, [2, 3]))
+        #conv_img_re = tf.stop_gradient(tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels]))
+        #fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
+        #fc_img_re = tf.stop_gradient(tf.squeeze(fc_img_re, [2, 3]))
 
         #todo:stop grad
-        #conv_img_re = tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
-        #fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
-        #fc_img_re = tf.squeeze(fc_img_re, [2, 3])
+        conv_img_re = tf.reshape(conv_img, [-1, self.config.n_steps] + self.config.conv_input_shape + [self.config.channels])
+        fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
+        fc_img_re = tf.squeeze(fc_img_re, [2, 3])
 
         fc_img_out, alphas_fc = self.FC_LSTM(fc_img_re, False)
         conv_img_out, alphas, v, im_outputs, temp_atten = self.CONV_LSTM(conv_img_re, True)
@@ -135,8 +135,10 @@ class ExampleModel(BaseModel):
         accum_vars = [tf.Variable(tf.zeros_like(tv.initialized_value()), trainable=False) for tv in tvs]
         zero_ops = [tv.assign(tf.zeros_like(tv)) for tv in accum_vars]
 
-        # Calls the compute_gradients function of the optimizer to obtain... the list of gradients
-        gvs = opt.compute_gradients(loss, tvs)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            # Calls the compute_gradients function of the optimizer to obtain... the list of gradients
+            gvs = opt.compute_gradients(loss, tvs)
 
         # Adds to each element from the list you initialized earlier with zeros its gradient
         # (works because accum_vars and gvs are in the same order)
@@ -252,9 +254,15 @@ class ExampleModel(BaseModel):
 
     # just creates the saver node
     def init_lstm_saver(self):
+        # todo: correct patch
+        # mn_copy_vars = ['Variable_' + str(i) + ':0' for i in range(25, 183)]
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         # this saver deals with all cariables except mobile net.
+        # restore_var = [v for v in tf.all_variables() if v.name[:10] != 'mobile_net' and (v.name in mn_copy_vars)==False]
         restore_var = [v for v in tf.all_variables() if v.name[:10] != 'mobile_net']
+        with open('restore_var.txt', 'w') as f:
+            for item in restore_var:
+                f.write("%s\n" % item)
         self.lstm_saver = tf.train.Saver(restore_var, max_to_keep=self.config.max_to_keep)
 
     # just creates the saver node
