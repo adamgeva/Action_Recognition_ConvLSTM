@@ -19,6 +19,8 @@
   "scale" : 1,
   "frame_size" : [224, 224, 3],
   "new_frame_size" : [150, 150, 3],
+  "avg_human_h" : 25.7,
+  "avg_human_w" : 11.1,
   "target_fps" : 10,
   "n_examples_per_clip" : 10,
   "n_step_size" : 20,

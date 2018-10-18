@@ -53,10 +53,12 @@ for sub_dir in subdirs[1:]:
             if file_name[-3:] == 'par':
                 continue
             im_name = sub_dir + '/' + file_name
-            frame = cv2.imread(im_name)
+            frame = cv2.imread(im_name, cv2.IMREAD_ANYDEPTH)
             norm_frame = normalize_im(frame)
-            out.write(norm_frame)
-
+            b = np.repeat(norm_frame[:, :, np.newaxis], 3, axis=2)
+            #cv2.imshow('test', norm_frame)
+            #cv2.waitKey(0)
+            out.write(b)
 
     out.release()
 

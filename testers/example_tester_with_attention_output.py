@@ -1,6 +1,7 @@
 from base.base_test import BaseTest
 from tqdm import tqdm
 import numpy as np
+from utils.utils_plotting import *
 import cv2
 import gc
 
@@ -91,10 +92,25 @@ class ExampleTesterPlotAttention(BaseTest):
             self.model.prob: prob
         }
 
-        fc_score, conv_score, loss, a, a_fc, im_outputs = self.sess.run([self.model.fc_pred, self.model.conv_pred,
-                                                    self.model.loss, self.model.alphas,
-                                                    self.model.alphas_fc, self.model.im_outputs], feed_dict)
+        fc_score, conv_score, loss, a, a_fc, im_outputs, temp_atten_out, w2, b2, conv_img_out, conv_img_drop = \
+                                                                                    self.sess.run([self.model.fc_pred,
+                                                                                    self.model.conv_pred,
+                                                                                    self.model.loss,
+                                                                                    self.model.alphas,
+                                                                                    self.model.alphas_fc,
+                                                                                    self.model.im_outputs,
+                                                                                    self.model.temp_attention,
+                                                                                    self.model.weights2,
+                                                                                    self.model.biases2,
+                                                                                    self.model.conv_img_out,
+                                                                                    self.model.conv_img_drop], feed_dict)
 
+        #todo: remove
+        plot_input_images(batch_frames, 'images')
+
+        plot_attention(temp_atten_out, 'atten')
+
+        plot_h_abs(im_outputs)
         # calc accuracy of the batch
         fc_score = np.reshape(np.array(fc_score), (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
         conv_score = np.reshape(np.array(conv_score), (self.config.batch_size, self.config.n_classes))

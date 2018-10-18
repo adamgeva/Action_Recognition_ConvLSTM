@@ -32,10 +32,15 @@ def conv_attention_sum(inputs, attention_kernel, time_major=False):
     vu = tf.matmul(tf.reshape(v,[-1,feature_channels]), tf.reshape(u, [-1, 1]))                 #[B*T*H*W,C]*[C,1] = [B*T*H*W,1]                                                                                          
     exps = tf.reshape(tf.exp(vu), [-1, feature_lengths])            #[B*W*H,T]                                                  
     alphas = exps / tf.reshape(tf.reduce_sum(exps, 1), [-1, 1])     #[B*W*H,T]
+
     alphas_r = tf.reshape(alphas, [-1, feature_lengths, inputs_shape[2].value, inputs_shape[3].value, 1])
+    temp = tf.reshape(alphas, [-1, feature_lengths, inputs_shape[2].value, inputs_shape[3].value, 1])
+    #temp = inputs * tf.reshape(alphas, [-1, feature_lengths, inputs_shape[2].value, inputs_shape[3].value, 1])
+    #temp2 = tf.matmul(tf.reshape(temp,[-1,feature_channels]), tf.reshape(u, [-1, 1]))
+    #temp3 = tf.reshape(temp2, [-1, feature_lengths, inputs_shape[2].value, inputs_shape[3].value, 1])
     output = tf.reduce_sum(inputs * tf.reshape(alphas, [-1, feature_lengths, inputs_shape[2].value, inputs_shape[3].value, 1]), 1)        #[B,T,H,W,C]*[B,T,H,W,1] ===> [B,H,W,C]                 
 
-    return output, alphas_r, v   #[B*H*W*C]
+    return output, alphas_r, v, temp   #[B*H*W*C]
 ############################################################# remove the time_dims
 
 

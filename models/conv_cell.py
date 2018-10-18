@@ -54,7 +54,7 @@ class ConvLSTMCell(tf.contrib.rnn.RNNCell):
       kernel = tf.get_variable('kernel', shape=self._kernel_size+[inp_channel, out_channel])
       concat = tf.nn.conv2d(concat, filter=kernel, strides=(1,1,1,1), padding='SAME') 
 
-      i, j, f, o = tf.split(value=concat, num_or_size_splits=4, axis=3)
+      i, j, f, o = tf.split(value=concat, num_or_size_splits=4, axis=3) # j is g
 
       new_c = (c * tf.sigmoid(f + self._forget_bias) + tf.sigmoid(i) *
                self._activation(j))

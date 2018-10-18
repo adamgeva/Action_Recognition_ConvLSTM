@@ -15,7 +15,7 @@ def main():
 
     # testing mode:
     # capture the config path from a finished experiment
-    config_filename = '/home/ADAMGE/action_recognition/models/exp26/configs_file.json'
+    config_filename = '/home/ADAMGE/action_recognition/models/exp30/configs_file.json'
     data_to_test = 'test'
 
     # paths

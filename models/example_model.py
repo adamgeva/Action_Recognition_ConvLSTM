@@ -29,6 +29,7 @@ class ExampleModel(BaseModel):
         self.fc_img = None
         self.conv_img = None
         self.conv_img_out = None
+        self.conv_img_drop = None
         self.ys = None
         self.Lr = None
         self.fc_loss = None
@@ -47,8 +48,12 @@ class ExampleModel(BaseModel):
         self.alphas_fc = None
         self.v = None
         self.im_outputs = None
+        self.temp_attention = None
         # todo: is that the correct initialization?
         self.is_training = None
+
+        self.weights2 = None
+        self.biases2 = None
 
         self.build_model()
         self.init_global_saver()
@@ -97,8 +102,8 @@ class ExampleModel(BaseModel):
         #fc_img_re = tf.reshape(fc_img, [-1, self.config.n_steps] + [1, 1, self.config.n_fc_inputs])
         #fc_img_re = tf.squeeze(fc_img_re, [2, 3])
 
-        fc_img_out, alphas_fc = self.FC_LSTM(fc_img_re, True)
-        conv_img_out, alphas, v, im_outputs = self.CONV_LSTM(conv_img_re, True)
+        fc_img_out, alphas_fc = self.FC_LSTM(fc_img_re, False)
+        conv_img_out, alphas, v, im_outputs, temp_atten = self.CONV_LSTM(conv_img_re, True)
 
         fc_img_drop = tf.nn.dropout(fc_img_out, prob)
         conv_img_drop = tf.nn.dropout(conv_img_out, prob)
@@ -107,9 +112,9 @@ class ExampleModel(BaseModel):
         conv_img_drop = tf.reshape(conv_img_drop, [-1, self.config.n_filters])
 
         with tf.variable_scope("FC"):
-            fc_result = self.FC_layer(fc_img_drop, prob)
+            fc_result, _, _ = self.FC_layer(fc_img_drop, prob)
             tf.get_variable_scope().reuse_variables()
-            conv_result = self.FC_layer(conv_img_drop, prob)
+            conv_result, weights2, biases2 = self.FC_layer(conv_img_drop, prob)
 
         fc_pred = tf.nn.softmax(fc_result)
         conv_pred = tf.nn.softmax(conv_result)
@@ -150,6 +155,7 @@ class ExampleModel(BaseModel):
         # maintain the complete model nodes and points of interaction
         self.fc_img = fc_img
         self.conv_img = conv_img
+        self.conv_img_drop = conv_img_drop
         self.conv_img_out = conv_img_out
         self.ys = ys
         self.Lr = Lr
@@ -167,12 +173,16 @@ class ExampleModel(BaseModel):
         self.prob = prob
         self.alphas = alphas
         self.alphas_fc = alphas_fc
+        self.temp_attention = temp_atten
         self.v = v
         self.im_outputs = im_outputs
         self.is_training = is_training
 
         self.input_img = input_img
         self.mn_predictions = predictions
+
+        self.weights2 = weights2
+        self.biases2 = biases2
 
     def FC_LSTM(self, X_spa, attention):
         weights_img = tf.Variable(tf.random_normal([self.config.n_fc_inputs, self.config.n_hidden_units]))
@@ -202,9 +212,9 @@ class ExampleModel(BaseModel):
         img_cell = ConvLSTMCell(self.config.conv_input_shape, self.config.n_filters, self.config.kernel)
         img_outputs, img_state = tf.nn.dynamic_rnn(img_cell, conv_img, dtype=conv_img.dtype, time_major=True)
         if attention:
-            img_attention_output, alphas, v = conv_attention_sum(img_outputs, self.config.attention_kernel)
+            img_attention_output, alphas, v, temp = conv_attention_sum(img_outputs, self.config.attention_kernel)
             img_attention_output = tf.layers.batch_normalization(img_attention_output)
-            return img_attention_output, alphas, v, img_outputs
+            return img_attention_output, alphas, v, img_outputs, temp
         else:
             alphas = v = 0
             img_outputs = tf.layers.batch_normalization(img_outputs)
@@ -217,7 +227,7 @@ class ExampleModel(BaseModel):
         biases2 = tf.get_variable("biases2", [self.config.n_classes],
                                   initializer=tf.truncated_normal_initializer())
         result = tf.nn.dropout((tf.matmul(inputs, weights2) + biases2), drop_prob)
-        return result
+        return result, weights2, biases2
 
     # the saver node was created already - this actually restores the variables
     def restore_mobile_net(self, sess):

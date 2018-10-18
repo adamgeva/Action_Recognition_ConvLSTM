@@ -9,6 +9,7 @@ from train_faster import predict, main_run_faster
 from utils.video_fifo import VideoFIFO
 from utils.utils_video import filter_bb
 import utils.utils_data as utils_data
+from utils.utils_plotting import *
 
 import copy
 
@@ -76,7 +77,6 @@ class ExampleTesterOneSeq(BaseTest):
         # read video frames
         while True:
             flag, frame = capture.read()
-
             # end of movie
             if flag==0:
                 break
@@ -186,6 +186,8 @@ class ExampleTesterOneSeq(BaseTest):
 
         fc_score, conv_score = self.sess.run([self.model.fc_pred, self.model.conv_pred], feed_dict)
 
+        #plot_input_images(batch_frames, 'input')
+
         # calc accuracy of the batch
         fc_score = np.reshape(np.array(fc_score), (self.config.batch_size, self.config.n_classes))  # (batch_size, n_classes)
         conv_score = np.reshape(np.array(conv_score), (self.config.batch_size, self.config.n_classes))
@@ -199,3 +201,7 @@ class ExampleTesterOneSeq(BaseTest):
         predictions_mul = np.argmax(fus_mul, axis=1)
 
         return predictions_add, predictions_mul
+
+def plot_gray(im):
+    cv2.imshow('frame_gray', im)
+    cv2.waitKey(0)
