@@ -1,0 +1,76 @@
+<tf.Variable 'global_step/global_step:0' shape=() dtype=int32_ref>
+<tf.Variable 'cur_epoch/cur_epoch:0' shape=() dtype=int32_ref>
+<tf.Variable 'Variable:0' shape=(1280, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'rnn/multi_rnn_cell/cell_0/basic_lstm_cell/kernel:0' shape=(2048, 4096) dtype=float32_ref>
+<tf.Variable 'rnn/multi_rnn_cell/cell_0/basic_lstm_cell/bias:0' shape=(4096,) dtype=float32_ref>
+<tf.Variable 'Variable_2:0' shape=(1024, 50) dtype=float32_ref>
+<tf.Variable 'Variable_3:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_4:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/gamma:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/beta:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/moving_mean:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/moving_variance:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'rnn/basic_convlstm_cell/kernel:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_5:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_6:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_7:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/gamma:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/beta:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/moving_mean:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/moving_variance:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'FC/weights2:0' shape=(1024, 11) dtype=float32_ref>
+<tf.Variable 'FC/biases2:0' shape=(11,) dtype=float32_ref>
+<tf.Variable 'Variable_8:0' shape=(1280, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_9:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_10:0' shape=(2048, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_11:0' shape=(4096,) dtype=float32_ref>
+<tf.Variable 'Variable_12:0' shape=(1024, 50) dtype=float32_ref>
+<tf.Variable 'Variable_13:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_14:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_15:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_16:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_17:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_18:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_19:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_20:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_21:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_22:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_23:0' shape=(1024, 11) dtype=float32_ref>
+<tf.Variable 'Variable_24:0' shape=(11,) dtype=float32_ref>
+<tf.Variable 'beta1_power:0' shape=() dtype=float32_ref>
+<tf.Variable 'beta2_power:0' shape=() dtype=float32_ref>
+<tf.Variable 'Variable/Adam:0' shape=(1280, 1024) dtype=float32_ref>
+<tf.Variable 'Variable/Adam_1:0' shape=(1280, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_1/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_1/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'rnn/multi_rnn_cell/cell_0/basic_lstm_cell/kernel/Adam:0' shape=(2048, 4096) dtype=float32_ref>
+<tf.Variable 'rnn/multi_rnn_cell/cell_0/basic_lstm_cell/kernel/Adam_1:0' shape=(2048, 4096) dtype=float32_ref>
+<tf.Variable 'rnn/multi_rnn_cell/cell_0/basic_lstm_cell/bias/Adam:0' shape=(4096,) dtype=float32_ref>
+<tf.Variable 'rnn/multi_rnn_cell/cell_0/basic_lstm_cell/bias/Adam_1:0' shape=(4096,) dtype=float32_ref>
+<tf.Variable 'Variable_2/Adam:0' shape=(1024, 50) dtype=float32_ref>
+<tf.Variable 'Variable_2/Adam_1:0' shape=(1024, 50) dtype=float32_ref>
+<tf.Variable 'Variable_3/Adam:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_3/Adam_1:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_4/Adam:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_4/Adam_1:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/gamma/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/gamma/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/beta/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization/beta/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'rnn/basic_convlstm_cell/kernel/Adam:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'rnn/basic_convlstm_cell/kernel/Adam_1:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_5/Adam:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_5/Adam_1:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_6/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_6/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_7/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_7/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/gamma/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/gamma/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/beta/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'batch_normalization_1/beta/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'FC/weights2/Adam:0' shape=(1024, 11) dtype=float32_ref>
+<tf.Variable 'FC/weights2/Adam_1:0' shape=(1024, 11) dtype=float32_ref>
+<tf.Variable 'FC/biases2/Adam:0' shape=(11,) dtype=float32_ref>
+<tf.Variable 'FC/biases2/Adam_1:0' shape=(11,) dtype=float32_ref>

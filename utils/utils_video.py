@@ -42,6 +42,14 @@ def line_to_path_SDHA(line, SDHA_path):
     return curr_video_full_path, curr_video_class
 
 
+# takes a line and returns the full path and class of the vid line
+def line_to_path_Combined(line, Combined_path):
+    video_name = line.split(" ")[0]
+    curr_video_class = video_name.split('_')[0]
+    curr_video_full_path = Combined_path + curr_video_class + '/' + video_name
+
+    return curr_video_full_path, curr_video_class
+
 # modifies the RGB seq and size to fit the input size of mobile net
 def val_reprocess(config, frame):
     # for mobile net - input value is -1 to 1
@@ -74,12 +82,19 @@ def skip_first_frames(vid_capture, first_frame):
 def augment_frames(frames):
     frames = (frames + 1.0) * 128.
     frames = frames.astype('uint8')
+    r = np.random.rand()
+    if r>0.5:
+        scale = np.random.uniform(1,1.2,1)
+    else:
+        scale = 1 / np.random.uniform(1,1.2,1)
     seq = iaa.Sequential([
-        iaa.Affine(scale=(1/1.6, (1.6))),
+        iaa.Affine(scale=(scale, scale)),
+        iaa.Affine(translate_px={"x": (-5, 5)}),
+        iaa.Affine(translate_px={"y": (-8, 8)}),
         #iaa.Add((-20, 20)),
         #iaa.AddToHueAndSaturation((-20, 20), per_channel=True),
-        #iaa.ContrastNormalization(alpha=(0.5,1.5)),
-        #iaa.Grayscale(alpha=(0.0, 1.0)),
+        iaa.ContrastNormalization(alpha=(0.5, 2.0)),
+        iaa.Grayscale(alpha=(0.0, 0.3)),
         iaa.Fliplr(0.5),  # horizontally flip 50% of the images
         #iaa.Affine(rotate=(0, 0))
     ])

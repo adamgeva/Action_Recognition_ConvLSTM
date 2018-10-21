@@ -94,7 +94,7 @@ class DataGenerator:
         elif self.config.data == "SDHA":
             curr_video_full_path, curr_video_class = utils_video.line_to_path_SDHA(line, self.config.SDHA_2010_path)
         elif self.config.data == "Combined":
-            curr_video_full_path, curr_video_class = utils_video.line_to_path_SDHA(line, self.config.Combined_path)
+            curr_video_full_path, curr_video_class = utils_video.line_to_path_Combined(line, self.config.Combined_path)
         self.update_state()
         return curr_video_full_path, curr_video_class
 

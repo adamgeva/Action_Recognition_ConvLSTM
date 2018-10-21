@@ -2,9 +2,9 @@
   "UCF_ARG_path" : "/hdd/UCF-ARG/rooftop_clips_stab_crop/",
   "SDHA_2010_path" : "/hdd/SDHA2010/Output_Videos_cropped/",
   "Combined_path" : "/hdd/Combined/",
-  "train_list" : "/hdd/UCF-ARG/rooftop_clips_stab_crop/train_list.txt",
+  "train_list" : "/hdd/Combined/train_list.txt",
   "test_list"  : "/hdd/Combined/test_list.txt",
-  "val_list"  : "/hdd/UCF-ARG/rooftop_clips_stab_crop/val_list.txt",
+  "val_list"  : "/hdd/Combined/val_list.txt",
   "classInd"   : "/hdd/Combined/classesInd.txt",
   "mobile_net_ckpt" : "/home/ADAMGE/action_recognition/models/mobile_net_imagenet/mobilenet_v2_1.0_224.ckpt"
 }

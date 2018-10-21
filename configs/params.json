@@ -1,5 +1,5 @@
 {
-  "data": "SDHA",
+  "data": "Combined",
   "exp_name": "example",
   "mobilenet_base": "imagenet",
   "num_epochs": 100,
