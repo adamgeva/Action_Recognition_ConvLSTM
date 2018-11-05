@@ -42,12 +42,16 @@ def read_data(list_path, label_dict, is_shuffle, data):
         if data == "UCF":
             x = video.split(" ")[0].split('_')[-1][:-4]
             video_class = re.split('(\d+)', x)[0]
+            ground_label = label_dict[video_class]
         elif data == "SDHA":
             video_class = video.split('_')[0]
+            ground_label = label_dict[video_class]
         elif data == "Combined":
             video_class = video.split('_')[0]
+            ground_label = label_dict[video_class]
+        elif data == "HMDB":
+            ground_label = int(video.split(' ')[1][:-1])
 
-        ground_label = label_dict[video_class]
         labels.append(ground_label)
 
     print(labels)

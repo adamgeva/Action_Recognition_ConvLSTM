@@ -12,7 +12,7 @@ import numpy as np
 os.system("ls -l")
 
 vid_dir = '/hdd/IR-new/Stabilized/'
-vid_dir_new = '/hdd/IR-new/Stab_Cropped_Random/'
+vid_dir_new = '/hdd/IR-new/Stab_Cropped_Random/walking/'
 example_size = 40
 step_size = 40
 new_width = 150
@@ -92,9 +92,9 @@ def write_movie(orig_path, new_path, start_frame):
 
 
 pbar = tqdm(total=108)
-
+num = 0
 for root, dirs, files in os.walk(vid_dir):
-    for name in files:
+    for k, name in enumerate(files):
 
         path = vid_dir_new
 
@@ -108,11 +108,12 @@ for root, dirs, files in os.walk(vid_dir):
         if n_ex_inclip < 0:
             n_ex_inclip = 0
 
-        for i in range(n_ex_inclip):
-            vid_out = path + name[:-4] + '_' + str(i) + '.avi'
-
-            write_movie(vid_in, vid_out, i * step_size)
-
+        n_samples = 3
+        for i in range(0, n_ex_inclip):
+            for j in range(n_samples):
+                vid_out = path + 'walking_' + str(num) + '.avi'
+                write_movie(vid_in, vid_out, i * step_size)
+                num = num + 1
             print(vid_in)
             print(vid_out)
 

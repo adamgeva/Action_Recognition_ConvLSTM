@@ -72,6 +72,7 @@ class ExampleTesterOneSeq(BaseTest):
 
         detections = []
         predictions = []
+        fusions = []
 
         flag = 1
         # read video frames
@@ -106,6 +107,7 @@ class ExampleTesterOneSeq(BaseTest):
                     human_detection_det = (human_bb[0], human_bb[1], human_bb[2] + human_bb[0], human_bb[3] + human_bb[1])
                     detections.append(copy.copy(human_detection_det))
                     predictions.append(0)
+                    fusions.append(0)
 
                 else:
                     for det in human_bb:
@@ -120,6 +122,7 @@ class ExampleTesterOneSeq(BaseTest):
 
                         detections.append(copy.copy(det))
                         predictions.append(0)
+                        fusions.append(0)
 
                 initBB = True
 
@@ -141,8 +144,9 @@ class ExampleTesterOneSeq(BaseTest):
                                                          self.config.new_frame_size[1], frame_num)
 
                     # run model to get predictions
-                    predictions_add, predictions_mul = self.test_step(curr_block)
+                    predictions_add, predictions_mul, fus_mul = self.test_step(curr_block)
                     predictions[i] = predictions_mul
+                    fusions[i] = fus_mul
                     # draw predictions
                     print(self.label_dict_inv[int(predictions_add)])
                     print(self.label_dict_inv[int(predictions_mul)])
@@ -157,6 +161,27 @@ class ExampleTesterOneSeq(BaseTest):
                             (h[0], h[1]),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             0.5,
+                            (0, 0, 255),
+                            1)
+
+
+                probs1 = self.label_dict_inv[0] + '=' + str(fusions[i][0][0]) + ',' + \
+                self.label_dict_inv[1] + '=' + str(fusions[i][0][1]) + ',' + \
+                self.label_dict_inv[2] + '=' + str(fusions[i][0][2])
+                probs2 = self.label_dict_inv[3] + '=' + str(fusions[i][0][3]) + ',' +\
+                self.label_dict_inv[4] + '=' + str(fusions[i][0][4])
+
+                cv2.putText(frame_rec, probs1,
+                            (10, 40),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.3,
+                            (0, 0, 255),
+                            1)
+
+                cv2.putText(frame_rec, probs2,
+                            (10, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.3,
                             (0, 0, 255),
                             1)
 
@@ -200,7 +225,7 @@ class ExampleTesterOneSeq(BaseTest):
         fus_mul = np.multiply(fc_score, conv_score)
         predictions_mul = np.argmax(fus_mul, axis=1)
 
-        return predictions_add, predictions_mul
+        return predictions_add, predictions_mul, fus_mul
 
 def plot_gray(im):
     cv2.imshow('frame_gray', im)

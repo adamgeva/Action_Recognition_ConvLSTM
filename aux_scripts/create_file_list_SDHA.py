@@ -3,21 +3,17 @@ from __future__ import division
 import os
 
 class_id_dict = {
-    'boxing' : 0,
-    'carrying'  : 1,
-    'clapping'  : 2,
-    'digging' : 3,
-    'openclosetrunk'  : 4,
-    'running' : 5,
-    'throwing'  : 6,
-    'walking'  : 7,
-    'waving'  : 8
+    'digging' : 0,
+    'running' : 1,
+    'throwing'  : 2,
+    'walking'  : 3,
+    'waving'  : 4
 }
 
 
 os.system("ls -l")
 
-vid_dir = '/hdd/SDHA2010/Output_Videos_cropped/'
+vid_dir = '/hdd/SDHA2010/Output_Videos_cropped_merged/'
 
 subdirs = [x[0] for x in os.walk(vid_dir)]
 print(subdirs)

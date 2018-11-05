@@ -25,10 +25,13 @@ class ExampleTrainer(BaseTrain):
         lr = self.config.basic_lr
 
         loop_train = tqdm(range(self.num_train_iter_per_epoch))
-
+        eod = False
         # iterate over steps (batches)
         for _ in loop_train:
-            accu_add, accu_mul, loss = self.train_step(lr)
+            accu_add, accu_mul, loss, eod = self.train_step(lr)
+            if eod:
+                print('end of data - continuing')
+                continue
 
             cur_it = self.model.global_step_tensor.eval(self.sess)
             summaries_dict = {
@@ -38,6 +41,7 @@ class ExampleTrainer(BaseTrain):
             }
             self.logger.summarize(cur_it, summaries_dict=summaries_dict)
 
+        eod = False
         # validate every few epochs
         if curr_epoch % self.config.val_interval == 0:
             losses_val = []
@@ -51,7 +55,10 @@ class ExampleTrainer(BaseTrain):
 
             # iterate over steps (batches)
             for _ in loop_validate:
-                accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes = self.validate_step(lr)
+                accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes, eod = self.validate_step(lr)
+                if eod:
+                    print('end of data - continuing')
+                    continue
                 losses_val.append(loss)
                 accs_add_val.append(accu_add)
                 accs_mul_val.append(accu_mul)
@@ -90,7 +97,10 @@ class ExampleTrainer(BaseTrain):
         # get next batch
 
         prob = 1.0
-        batch_frames, batch_labels = self.data_validate.next_batch()
+        batch_frames, batch_labels, eod = self.data_validate.next_batch()
+
+        if eod:
+            return 0, 0, 0, 0, 0, 0, True
 
         feed_dict = {
             self.model.is_training: False,
@@ -119,7 +129,7 @@ class ExampleTrainer(BaseTrain):
         predictions_mul = np.argmax(fus_mul, axis=1)
         accu_mul = accuracy(predictions_mul, gt_classes)
 
-        return accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes
+        return accu_add, accu_mul, loss, predictions_add, predictions_mul, gt_classes, False
 
     def train_step(self, lr):
 
@@ -135,7 +145,9 @@ class ExampleTrainer(BaseTrain):
         # Accumulate the gradients 'n_minibatches' times in accum_vars using accum_ops
         for i in range(self.config.n_minibatches):
 
-            batch_frames, batch_labels = self.data_train.next_batch()
+            batch_frames, batch_labels, eod = self.data_train.next_batch()
+            if eod:
+                return 0, 0, 0, True
 
             feed_dict = {
                 self.model.is_training: True,
@@ -184,5 +196,5 @@ class ExampleTrainer(BaseTrain):
         accu_mul_batch = accu_mul_batch / self.config.n_minibatches
         loss_batch = loss_batch / self.config.n_minibatches
 
-        return accu_add_batch, accu_mul_batch, loss_batch
+        return accu_add_batch, accu_mul_batch, loss_batch, False
 

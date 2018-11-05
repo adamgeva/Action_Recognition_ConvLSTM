@@ -39,7 +39,7 @@ class DataGenerator:
     # returns the batch fc and conv features and labels
     def next_batch(self):
         time1 = time.time()
-
+        eod = False
         batch_frames = np.zeros((self.config.batch_size,
                                  self.config.n_steps,
                                  self.config.frame_size[0],
@@ -48,9 +48,11 @@ class DataGenerator:
 
         batch_labels = np.zeros((self.config.batch_size, self.config.n_classes), dtype=np.int8)
 
-        for example_ind in range(self.config.batch_size):
+        example_ind = 0
+        while example_ind < self.config.batch_size:
             if self.end_of_data():
                 # if we finished the data, the rest of the batch array is zeros.
+                eod = True
                 break
             else:
                 # get next path and class
@@ -75,12 +77,13 @@ class DataGenerator:
                 # assign to the big array
                 batch_frames[example_ind] = frames
                 batch_labels[example_ind] = label
+                example_ind += 1
 
         time2 = time.time()
 
         print("batch_read_time:", '{0:.2f}'.format(time2 - time1), "s")
 
-        return batch_frames, batch_labels
+        return batch_frames, batch_labels, eod
 
     # did we reach the end of the line list?
     def end_of_data(self):
@@ -95,6 +98,8 @@ class DataGenerator:
             curr_video_full_path, curr_video_class = utils_video.line_to_path_SDHA(line, self.config.SDHA_2010_path)
         elif self.config.data == "Combined":
             curr_video_full_path, curr_video_class = utils_video.line_to_path_Combined(line, self.config.Combined_path)
+        elif self.config.data == "HMDB":
+            curr_video_full_path, curr_video_class = utils_video.line_to_path_HMDB(line, self.config.HMDB_path, self.label_dict_inv)
         self.update_state()
         return curr_video_full_path, curr_video_class
 
@@ -175,8 +180,17 @@ def get_clip_frames(config, video_path):
     bit = 0
     capture = cv2.VideoCapture(video_path)
     fps = capture.get(cv2.CAP_PROP_FPS)
+    length = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
 
     frame_gap = int(round(fps / config.target_fps))
+
+    if config.random_start:
+        start_frame = int(np.random.rand() * (length - int(config.n_steps * frame_gap) - 1))
+
+        # skip first frames
+        for j in range(start_frame):
+            flag, frame = capture.read()
+
     frame_num = 0
     # extract features
     while (capture.isOpened()) & (int(round(frame_num / frame_gap)) < config.n_steps) & (bit == 0):

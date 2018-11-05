@@ -82,7 +82,7 @@ class ExampleModel(BaseModel):
         with tf.variable_scope("mobile_net"):
             # Define the model:
             # Note: arg_scope is optional for inference.
-            with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
+            with tf.contrib.slim.arg_scope(mobilenet_v2.training_scope(is_training=is_training)):
                 last_layer_logits, end_points = mobilenet_v2.mobilenet(input_img_mn)
 
             conv_img = end_points[self.config.mobilenet_out_layer]
@@ -103,7 +103,7 @@ class ExampleModel(BaseModel):
         fc_img_re = tf.squeeze(fc_img_re, [2, 3])
 
         fc_img_out, alphas_fc = self.FC_LSTM(fc_img_re, False)
-        conv_img_out, alphas, v, im_outputs, temp_atten = self.CONV_LSTM(conv_img_re, True)
+        conv_img_out, alphas, v, im_outputs, temp_atten = self.CONV_LSTM(conv_img_re, False)
 
         fc_img_drop = tf.nn.dropout(fc_img_out, prob)
         conv_img_drop = tf.nn.dropout(conv_img_out, prob)
@@ -127,8 +127,8 @@ class ExampleModel(BaseModel):
 
         # todo: fix not to include mn
         # Retrieve all trainable variables defined in graph
-        tvs = [v for v in tf.trainable_variables() if v.name[:10] != 'mobile_net']
-        # tvs = [v for v in tf.trainable_variables()]
+        #tvs = [v for v in tf.trainable_variables() if v.name[:10] != 'mobile_net']
+        tvs = [v for v in tf.trainable_variables()]
 
         # Creation of a list of variables with the same shape as the trainable ones
         # initialized with 0s
@@ -221,7 +221,7 @@ class ExampleModel(BaseModel):
             alphas = v = 0
             img_outputs = tf.layers.batch_normalization(img_outputs)
             img_outputs = tf.reduce_sum(img_outputs, axis=1)
-            return img_outputs, alphas, v
+            return img_outputs, alphas, v, img_outputs, 0
 
     def FC_layer(self, inputs, drop_prob):
         weights2 = tf.get_variable("weights2", [self.config.n_hidden_units, self.config.n_classes],

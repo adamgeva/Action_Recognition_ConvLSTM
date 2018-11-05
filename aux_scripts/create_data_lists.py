@@ -2,6 +2,7 @@ import os
 from random import shuffle
 import re
 
+data = 'Combined'
 
 # create the file with statistics
 def lists_to_file(text_filename, lists, labels):
@@ -9,8 +10,13 @@ def lists_to_file(text_filename, lists, labels):
 
     for class_list in lists:
         for file_name in class_list:
-            x = file_name.split('_')[-1][:-4]
-            class_name = re.split('(\d+)', x)[0]
+            if data == 'Combined':
+
+                class_name = file_name.split('_')[0]
+            else:
+                x = file_name.split('_')[-1][:-4]
+                class_name = re.split('(\d+)', x)[0]
+
             class_id = labels[class_name]
             text_file.write("%s  %d\n" % (file_name, class_id))
 
@@ -18,27 +24,22 @@ def lists_to_file(text_filename, lists, labels):
 
 
 # script for creating the data reference files:
-train_percent = 4 / 100 # change below 1 only for debugging mode.
-test_percent = 15 / 100
+train_percent = 85 / 100 # change below 1 only for debugging mode.
+test_percent = 0 / 100
 val_percent = 15 / 100
 
 
 # first create the label dictionary
 labels = dict()
 labels = {
-    'boxing': 0,
-    'carrying': 1,
-    'clapping': 2,
-    'digging': 3,
-    'jogging': 4,
-    'openclosetrunk': 5,
-    'running': 6,
-    'throwing': 7,
-    'walking': 8,
-    'waving': 9
+    'digging': 0,
+    'running': 1,
+    'throwing': 2,
+    'walking': 3,
+    'waving': 4
 }
 
-root_dir = '/hdd/UCF-ARG/rooftop_clips_stab_crop/'
+root_dir = '/hdd/IR-new/Stabilized_cropped/'
 
 subdirs = [x[0] for x in os.walk(root_dir)]
 print(subdirs)
