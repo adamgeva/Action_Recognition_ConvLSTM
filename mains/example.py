@@ -41,7 +41,7 @@ def main():
 
     # create your data generator
     data_train = DataGenerator(model, config, sess, 'train', shuffle=True, augment=False)
-    data_validate = DataGenerator(model, config, sess, 'test', shuffle=False, augment=False)
+    data_validate = DataGenerator(model, config, sess, 'validate', shuffle=False, augment=False)
 
     # create tensorboard logger
     logger = Logger(sess, config)

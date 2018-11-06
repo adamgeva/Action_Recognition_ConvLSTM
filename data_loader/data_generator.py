@@ -98,6 +98,8 @@ class DataGenerator:
             curr_video_full_path, curr_video_class = utils_video.line_to_path_SDHA(line, self.config.SDHA_2010_path)
         elif self.config.data == "Combined":
             curr_video_full_path, curr_video_class = utils_video.line_to_path_Combined(line, self.config.Combined_path)
+        elif self.config.data == "IR":
+            curr_video_full_path, curr_video_class = utils_video.line_to_path_IR(line, self.config.IR_path)
         elif self.config.data == "HMDB":
             curr_video_full_path, curr_video_class = utils_video.line_to_path_HMDB(line, self.config.HMDB_path, self.label_dict_inv)
         self.update_state()

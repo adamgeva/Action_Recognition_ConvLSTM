@@ -49,6 +49,9 @@ def read_data(list_path, label_dict, is_shuffle, data):
         elif data == "Combined":
             video_class = video.split('_')[0]
             ground_label = label_dict[video_class]
+        elif data == "IR":
+            video_class = video.split('_')[0]
+            ground_label = label_dict[video_class]
         elif data == "HMDB":
             ground_label = int(video.split(' ')[1][:-1])
 

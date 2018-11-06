@@ -12,184 +12,32 @@
 <tf.Variable 'batch_normalization/moving_mean:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization/moving_variance:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'rnn/basic_convlstm_cell/kernel:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_5:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_6:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_7:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/gamma:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/beta:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/moving_mean:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/moving_variance:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'FC/weights2:0' shape=(1024, 51) dtype=float32_ref>
-<tf.Variable 'FC/biases2:0' shape=(51,) dtype=float32_ref>
-<tf.Variable 'Variable_5:0' shape=(3, 3, 3, 32) dtype=float32_ref>
-<tf.Variable 'Variable_6:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_7:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_8:0' shape=(3, 3, 32, 1) dtype=float32_ref>
-<tf.Variable 'Variable_9:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_10:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_11:0' shape=(1, 1, 32, 16) dtype=float32_ref>
-<tf.Variable 'Variable_12:0' shape=(16,) dtype=float32_ref>
-<tf.Variable 'Variable_13:0' shape=(16,) dtype=float32_ref>
-<tf.Variable 'Variable_14:0' shape=(1, 1, 16, 96) dtype=float32_ref>
-<tf.Variable 'Variable_15:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_16:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_17:0' shape=(3, 3, 96, 1) dtype=float32_ref>
-<tf.Variable 'Variable_18:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_19:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_20:0' shape=(1, 1, 96, 24) dtype=float32_ref>
-<tf.Variable 'Variable_21:0' shape=(24,) dtype=float32_ref>
-<tf.Variable 'Variable_22:0' shape=(24,) dtype=float32_ref>
-<tf.Variable 'Variable_23:0' shape=(1, 1, 24, 144) dtype=float32_ref>
-<tf.Variable 'Variable_24:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_25:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_26:0' shape=(3, 3, 144, 1) dtype=float32_ref>
-<tf.Variable 'Variable_27:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_28:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_29:0' shape=(1, 1, 144, 24) dtype=float32_ref>
-<tf.Variable 'Variable_30:0' shape=(24,) dtype=float32_ref>
-<tf.Variable 'Variable_31:0' shape=(24,) dtype=float32_ref>
-<tf.Variable 'Variable_32:0' shape=(1, 1, 24, 144) dtype=float32_ref>
-<tf.Variable 'Variable_33:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_34:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_35:0' shape=(3, 3, 144, 1) dtype=float32_ref>
-<tf.Variable 'Variable_36:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_37:0' shape=(144,) dtype=float32_ref>
-<tf.Variable 'Variable_38:0' shape=(1, 1, 144, 32) dtype=float32_ref>
-<tf.Variable 'Variable_39:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_40:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_41:0' shape=(1, 1, 32, 192) dtype=float32_ref>
-<tf.Variable 'Variable_42:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_43:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_44:0' shape=(3, 3, 192, 1) dtype=float32_ref>
-<tf.Variable 'Variable_45:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_46:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_47:0' shape=(1, 1, 192, 32) dtype=float32_ref>
-<tf.Variable 'Variable_48:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_49:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_50:0' shape=(1, 1, 32, 192) dtype=float32_ref>
-<tf.Variable 'Variable_51:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_52:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_53:0' shape=(3, 3, 192, 1) dtype=float32_ref>
-<tf.Variable 'Variable_54:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_55:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_56:0' shape=(1, 1, 192, 32) dtype=float32_ref>
-<tf.Variable 'Variable_57:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_58:0' shape=(32,) dtype=float32_ref>
-<tf.Variable 'Variable_59:0' shape=(1, 1, 32, 192) dtype=float32_ref>
-<tf.Variable 'Variable_60:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_61:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_62:0' shape=(3, 3, 192, 1) dtype=float32_ref>
-<tf.Variable 'Variable_63:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_64:0' shape=(192,) dtype=float32_ref>
-<tf.Variable 'Variable_65:0' shape=(1, 1, 192, 64) dtype=float32_ref>
-<tf.Variable 'Variable_66:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_67:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_68:0' shape=(1, 1, 64, 384) dtype=float32_ref>
-<tf.Variable 'Variable_69:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_70:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_71:0' shape=(3, 3, 384, 1) dtype=float32_ref>
-<tf.Variable 'Variable_72:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_73:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_74:0' shape=(1, 1, 384, 64) dtype=float32_ref>
-<tf.Variable 'Variable_75:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_76:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_77:0' shape=(1, 1, 64, 384) dtype=float32_ref>
-<tf.Variable 'Variable_78:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_79:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_80:0' shape=(3, 3, 384, 1) dtype=float32_ref>
-<tf.Variable 'Variable_81:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_82:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_83:0' shape=(1, 1, 384, 64) dtype=float32_ref>
-<tf.Variable 'Variable_84:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_85:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_86:0' shape=(1, 1, 64, 384) dtype=float32_ref>
-<tf.Variable 'Variable_87:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_88:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_89:0' shape=(3, 3, 384, 1) dtype=float32_ref>
-<tf.Variable 'Variable_90:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_91:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_92:0' shape=(1, 1, 384, 64) dtype=float32_ref>
-<tf.Variable 'Variable_93:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_94:0' shape=(64,) dtype=float32_ref>
-<tf.Variable 'Variable_95:0' shape=(1, 1, 64, 384) dtype=float32_ref>
-<tf.Variable 'Variable_96:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_97:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_98:0' shape=(3, 3, 384, 1) dtype=float32_ref>
-<tf.Variable 'Variable_99:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_100:0' shape=(384,) dtype=float32_ref>
-<tf.Variable 'Variable_101:0' shape=(1, 1, 384, 96) dtype=float32_ref>
-<tf.Variable 'Variable_102:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_103:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_104:0' shape=(1, 1, 96, 576) dtype=float32_ref>
-<tf.Variable 'Variable_105:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_106:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_107:0' shape=(3, 3, 576, 1) dtype=float32_ref>
-<tf.Variable 'Variable_108:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_109:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_110:0' shape=(1, 1, 576, 96) dtype=float32_ref>
-<tf.Variable 'Variable_111:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_112:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_113:0' shape=(1, 1, 96, 576) dtype=float32_ref>
-<tf.Variable 'Variable_114:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_115:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_116:0' shape=(3, 3, 576, 1) dtype=float32_ref>
-<tf.Variable 'Variable_117:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_118:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_119:0' shape=(1, 1, 576, 96) dtype=float32_ref>
-<tf.Variable 'Variable_120:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_121:0' shape=(96,) dtype=float32_ref>
-<tf.Variable 'Variable_122:0' shape=(1, 1, 96, 576) dtype=float32_ref>
-<tf.Variable 'Variable_123:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_124:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_125:0' shape=(3, 3, 576, 1) dtype=float32_ref>
-<tf.Variable 'Variable_126:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_127:0' shape=(576,) dtype=float32_ref>
-<tf.Variable 'Variable_128:0' shape=(1, 1, 576, 160) dtype=float32_ref>
-<tf.Variable 'Variable_129:0' shape=(160,) dtype=float32_ref>
-<tf.Variable 'Variable_130:0' shape=(160,) dtype=float32_ref>
-<tf.Variable 'Variable_131:0' shape=(1, 1, 160, 960) dtype=float32_ref>
-<tf.Variable 'Variable_132:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_133:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_134:0' shape=(3, 3, 960, 1) dtype=float32_ref>
-<tf.Variable 'Variable_135:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_136:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_137:0' shape=(1, 1, 960, 160) dtype=float32_ref>
-<tf.Variable 'Variable_138:0' shape=(160,) dtype=float32_ref>
-<tf.Variable 'Variable_139:0' shape=(160,) dtype=float32_ref>
-<tf.Variable 'Variable_140:0' shape=(1, 1, 160, 960) dtype=float32_ref>
-<tf.Variable 'Variable_141:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_142:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_143:0' shape=(3, 3, 960, 1) dtype=float32_ref>
-<tf.Variable 'Variable_144:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_145:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_146:0' shape=(1, 1, 960, 160) dtype=float32_ref>
-<tf.Variable 'Variable_147:0' shape=(160,) dtype=float32_ref>
-<tf.Variable 'Variable_148:0' shape=(160,) dtype=float32_ref>
-<tf.Variable 'Variable_149:0' shape=(1, 1, 160, 960) dtype=float32_ref>
-<tf.Variable 'Variable_150:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_151:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_152:0' shape=(3, 3, 960, 1) dtype=float32_ref>
-<tf.Variable 'Variable_153:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_154:0' shape=(960,) dtype=float32_ref>
-<tf.Variable 'Variable_155:0' shape=(1, 1, 960, 320) dtype=float32_ref>
-<tf.Variable 'Variable_156:0' shape=(320,) dtype=float32_ref>
-<tf.Variable 'Variable_157:0' shape=(320,) dtype=float32_ref>
-<tf.Variable 'Variable_158:0' shape=(1, 1, 320, 1280) dtype=float32_ref>
-<tf.Variable 'Variable_159:0' shape=(1280,) dtype=float32_ref>
-<tf.Variable 'Variable_160:0' shape=(1280,) dtype=float32_ref>
-<tf.Variable 'Variable_161:0' shape=(1, 1, 1280, 1001) dtype=float32_ref>
-<tf.Variable 'Variable_162:0' shape=(1001,) dtype=float32_ref>
-<tf.Variable 'Variable_163:0' shape=(1280, 1024) dtype=float32_ref>
-<tf.Variable 'Variable_164:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'Variable_165:0' shape=(2048, 4096) dtype=float32_ref>
-<tf.Variable 'Variable_166:0' shape=(4096,) dtype=float32_ref>
-<tf.Variable 'Variable_167:0' shape=(1024, 50) dtype=float32_ref>
-<tf.Variable 'Variable_168:0' shape=(50,) dtype=float32_ref>
-<tf.Variable 'Variable_169:0' shape=(50,) dtype=float32_ref>
-<tf.Variable 'Variable_170:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'Variable_171:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'Variable_172:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
-<tf.Variable 'Variable_173:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'Variable_174:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'Variable_175:0' shape=(1024, 51) dtype=float32_ref>
-<tf.Variable 'Variable_176:0' shape=(51,) dtype=float32_ref>
+<tf.Variable 'FC/weights2:0' shape=(1024, 5) dtype=float32_ref>
+<tf.Variable 'FC/biases2:0' shape=(5,) dtype=float32_ref>
+<tf.Variable 'Variable_8:0' shape=(1280, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_9:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_10:0' shape=(2048, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_11:0' shape=(4096,) dtype=float32_ref>
+<tf.Variable 'Variable_12:0' shape=(1024, 50) dtype=float32_ref>
+<tf.Variable 'Variable_13:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_14:0' shape=(50,) dtype=float32_ref>
+<tf.Variable 'Variable_15:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_16:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_17:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_18:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_19:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_20:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_21:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_22:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_23:0' shape=(1024, 5) dtype=float32_ref>
+<tf.Variable 'Variable_24:0' shape=(5,) dtype=float32_ref>
 <tf.Variable 'beta1_power:0' shape=() dtype=float32_ref>
 <tf.Variable 'beta2_power:0' shape=() dtype=float32_ref>
 <tf.Variable 'Variable/Adam:0' shape=(1280, 1024) dtype=float32_ref>
@@ -212,11 +60,17 @@
 <tf.Variable 'batch_normalization/beta/Adam_1:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'rnn/basic_convlstm_cell/kernel/Adam:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
 <tf.Variable 'rnn/basic_convlstm_cell/kernel/Adam_1:0' shape=(3, 3, 1600, 4096) dtype=float32_ref>
+<tf.Variable 'Variable_5/Adam:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_5/Adam_1:0' shape=(1, 1, 1024, 1024) dtype=float32_ref>
+<tf.Variable 'Variable_6/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_6/Adam_1:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_7/Adam:0' shape=(1024,) dtype=float32_ref>
+<tf.Variable 'Variable_7/Adam_1:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/gamma/Adam:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/gamma/Adam_1:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/beta/Adam:0' shape=(1024,) dtype=float32_ref>
 <tf.Variable 'batch_normalization_1/beta/Adam_1:0' shape=(1024,) dtype=float32_ref>
-<tf.Variable 'FC/weights2/Adam:0' shape=(1024, 51) dtype=float32_ref>
-<tf.Variable 'FC/weights2/Adam_1:0' shape=(1024, 51) dtype=float32_ref>
-<tf.Variable 'FC/biases2/Adam:0' shape=(51,) dtype=float32_ref>
-<tf.Variable 'FC/biases2/Adam_1:0' shape=(51,) dtype=float32_ref>
+<tf.Variable 'FC/weights2/Adam:0' shape=(1024, 5) dtype=float32_ref>
+<tf.Variable 'FC/weights2/Adam_1:0' shape=(1024, 5) dtype=float32_ref>
+<tf.Variable 'FC/biases2/Adam:0' shape=(5,) dtype=float32_ref>
+<tf.Variable 'FC/biases2/Adam_1:0' shape=(5,) dtype=float32_ref>
