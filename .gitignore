@@ -109,3 +109,7 @@ data/cifar-100-python/
 
 # pycharm
 .idea/
+
+# meld
+*.orig
+
