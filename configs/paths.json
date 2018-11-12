@@ -1,7 +1,7 @@
 {
   "UCF_ARG_path" : "/hdd/UCF-ARG/rooftop_clips_stab_crop/",
   "SDHA_2010_path" : "/hdd/SDHA2010/Output_Videos_cropped/",
-  "Combined_path" : "/hdd/Combined/",
+  "Combined_path" : "/hdd/IR-new/Stabilized_cropped/",
   "HMDB_path" : "/hdd/hmdb51/",
   "IR_path" : "/hdd/IR-new/Stabilized_cropped/",
   "train_list" : "/hdd/IR-new/Stabilized_cropped/train_list.txt",

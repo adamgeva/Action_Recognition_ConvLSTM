@@ -15,8 +15,8 @@ def main():
 
     # testing mode:
     # capture the config path from a finished experiment
-    config_filename = '/home/ADAMGE/action_recognition/models/exp30/configs_file.json'
-    data_to_test = 'test'
+    config_filename = '/home/ADAMGE/action_recognition/models/exp35/configs_file.json'
+    data_to_test = 'validate'
 
     # paths
     paths_filename = '/home/ADAMGE/action_recognition/action_recognition_v1/configs/paths.json'
@@ -38,7 +38,7 @@ def main():
     logger = Logger(sess, config)
 
     # create trainer and pass all the previous components to it
-    tester = ExampleTesterPlotAttention(sess, model, data_test, config, logger)
+    tester = ExampleTester(sess, model, data_test, config, logger)
 
     # restore mobile net
     model.restore_mobile_net(sess)

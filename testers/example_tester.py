@@ -62,7 +62,7 @@ class ExampleTester(BaseTest):
     def test_step(self):
 
         prob = 1.0
-        batch_frames, batch_labels = self.data_test.next_batch()
+        batch_frames, batch_labels, _ = self.data_test.next_batch()
 
         feed_dict = {
             self.model.is_training: False,
